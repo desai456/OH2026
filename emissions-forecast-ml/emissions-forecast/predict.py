@@ -43,9 +43,7 @@ future_df["predicted_co2e_tonnes"] = model.predict(X_future).round(2)
 future_df[["month", "department", "predicted_co2e_tonnes"]].to_csv("outputs/forecast_next_6_months.csv", index=False)
 print(future_df[["month", "department", "predicted_co2e_tonnes"]])
 
-# ---------------------------------------------------------------------------
-# Plot: history vs forecast, company-wide total (matches the dashboard chart)
-# ---------------------------------------------------------------------------
+
 hist_total = history.groupby("month")["co2e_tonnes"].sum().reset_index()
 fcst_total = future_df.groupby("month")["predicted_co2e_tonnes"].sum().reset_index()
 
