@@ -1,12 +1,11 @@
 ﻿import React, { useState, useEffect, useMemo, useRef } from "react";
-import {
+import { 
   Leaf, Search, Bell, ChevronDown, Trophy, ShieldCheck, Users, 
   FileText, ClipboardCheck, AlertTriangle, Package, Heart, 
   Building2, User, Zap, Target, X, LogOut, UserCog, Shield
 } from "lucide-react";
 
-import { COLORS, NAV_TREE, DEFAULT_TABS, ROLE_MODULE_ACCESS } from "./constants/config";
-import { useAuth } from "./constants/AuthContext";
+import { COLORS, NAV_TREE, DEFAULT_TABS } from "./constants/config";
 import { getDashboardSummary, getNotifications, getSearchResults } from "./constants/api";
 import "./styles/App.css";
 
@@ -18,12 +17,6 @@ import GovernanceModule from "./components/modules/GovernanceModule";
 import GamificationModule from "./components/modules/GamificationModule";
 import ReportsModule from "./components/modules/ReportsModule";
 import SettingsModule from "./components/modules/SettingsModule";
-
-// Auth modules (new)
-import LoginPage from "./components/modules/LoginPage";
-import ProfilePage from "./components/modules/ProfilePage";
-import UserManagementModule from "./components/modules/UserManagementModule";
-import ForbiddenPage from "./components/modules/ForbiddenPage";
 
 const typeIcons = {
   department: <Building2 size={14} />,
@@ -38,15 +31,17 @@ const typeIcons = {
   challenge: <Trophy size={14} />,
 };
 
-// Admin nav items (only visible to Super Admin)
-const ADMIN_NAV = { id: "admin", label: "User Management", icon: UserCog, tone: "gov", tabs: ["Users", "Role management", "Login history"] };
-const PROFILE_NAV = { id: "profile", label: "My Profile", icon: User, tone: "env", tabs: [] };
+// Default mock user profile (since auth is removed)
+const mockUser = {
+  full_name: "Nisha Patel",
+  email: "nisha@ecosphere.com",
+  role_name: "Super Admin",
+  permissions: ["*"]
+};
 
 export default function EcoSphereApp() {
-  const { user, isAuthenticated, loading, logout, hasModuleAccess } = useAuth();
-
   const [active, setActive] = useState("dashboard");
-  const [tabs, setTabs] = useState({ ...DEFAULT_TABS, admin: "Users" });
+  const [tabs, setTabs] = useState({ ...DEFAULT_TABS });
   const [overallScore, setOverallScore] = useState(81);
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -104,46 +99,18 @@ export default function EcoSphereApp() {
   };
 
   useEffect(() => {
-    if (isAuthenticated) {
-      loadGlobalMetrics();
-      const interval = setInterval(loadGlobalMetrics, 10000);
-      return () => clearInterval(interval);
-    }
-  }, [isAuthenticated]);
+    loadGlobalMetrics();
+    const interval = setInterval(loadGlobalMetrics, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   const currentTab = tabs[active];
   const goTo = (moduleId, tabName) => {
-    // Check access before navigating
-    if (!hasModuleAccess(moduleId) && moduleId !== "profile" && moduleId !== "dashboard") {
-      setActive("forbidden");
-      return;
-    }
     setActive(moduleId);
     if (tabName) setTabs((t) => ({ ...t, [moduleId]: tabName }));
   };
 
-  // Build filtered nav tree based on user role
-  const filteredNavTree = useMemo(() => {
-    if (!user) return [];
-    const allowedModules = ROLE_MODULE_ACCESS[user.role_name] || [];
-    const base = NAV_TREE.filter(n => allowedModules.includes(n.id) || allowedModules.includes("*") || n.id === "dashboard");
-    // Add admin nav for Super Admin
-    if (user.role_name === "Super Admin") base.push(ADMIN_NAV);
-    // Add profile nav for everyone
-    base.push(PROFILE_NAV);
-    return base;
-  }, [user]);
-
   const content = useMemo(() => {
-    if (active === "forbidden") return <ForbiddenPage onGoBack={() => setActive("dashboard")} />;
-    if (active === "profile") return <ProfilePage />;
-    if (active === "admin") return <UserManagementModule tab={currentTab} />;
-
-    // Check access for existing modules
-    if (active !== "dashboard" && !hasModuleAccess(active)) {
-      return <ForbiddenPage onGoBack={() => setActive("dashboard")} />;
-    }
-
     switch (active) {
       case "dashboard": return <DashboardModule onRefresh={loadGlobalMetrics} goTo={goTo} />;
       case "environmental": return <EnvironmentalModule tab={currentTab} onRefresh={loadGlobalMetrics} />;
@@ -154,25 +121,9 @@ export default function EcoSphereApp() {
       case "settings": return <SettingsModule tab={currentTab} onRefresh={loadGlobalMetrics} />;
       default: return null;
     }
-  }, [active, currentTab, user]);
+  }, [active, currentTab]);
 
-  // Show loading spinner while auth is initializing
-  if (loading) {
-    return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", background: COLORS.bg }}>
-        <div style={{ textAlign: "center" }}>
-          <Leaf size={32} color={COLORS.env} />
-          <div style={{ marginTop: "12px", color: COLORS.inkSoft, fontSize: "14px" }}>Loading EcoSphere...</div>
-        </div>
-      </div>
-    );
-  }
-
-  // Show login page if not authenticated
-  if (!isAuthenticated) return <LoginPage />;
-
-  // User initials for avatar
-  const userInitials = user?.full_name?.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase() || "U";
+  const userInitials = "NP";
 
   return (
     <div className="ecosphere-app">
@@ -185,7 +136,7 @@ export default function EcoSphereApp() {
           </div>
         </div>
         <nav className="nav-list">
-          {filteredNavTree.map((n) => {
+          {NAV_TREE.map((n) => {
             const Icon = n.icon;
             const color = { ink: COLORS.ink, env: COLORS.env, social: COLORS.social, gov: COLORS.gov, game: COLORS.game }[n.tone];
             const isModuleActive = active === n.id;
@@ -224,7 +175,7 @@ export default function EcoSphereApp() {
 
       <div className="main-col">
         <header className="topbar">
-          <div className="topbar-title">{filteredNavTree.find((n) => n.id === active)?.label || "Dashboard"}</div>
+          <div className="topbar-title">{NAV_TREE.find((n) => n.id === active)?.label || "Dashboard"}</div>
           <button 
             className="search-box" 
             style={{ cursor: "pointer", textAlign: "left", width: "260px", background: "none", border: `1px solid ${COLORS.line}` }} 
@@ -266,7 +217,7 @@ export default function EcoSphereApp() {
             <div style={{ position: "relative" }}>
               <div className="user-chip" onClick={() => setShowUserMenu(!showUserMenu)} style={{ cursor: "pointer" }}>
                 <span className="user-avatar">{userInitials}</span>
-                <span className="user-name">{user?.full_name || "User"}</span>
+                <span className="user-name">{mockUser.full_name}</span>
                 <ChevronDown size={13} color={COLORS.inkSoft} />
               </div>
               {showUserMenu && (
@@ -277,21 +228,9 @@ export default function EcoSphereApp() {
                   zIndex: 1001, overflow: "hidden",
                 }}>
                   <div style={{ padding: "12px 14px", borderBottom: `1px solid ${COLORS.line}` }}>
-                    <div style={{ fontSize: "13px", fontWeight: "600", color: COLORS.ink }}>{user?.full_name}</div>
-                    <div style={{ fontSize: "11px", color: COLORS.inkSoft }}>{user?.role_name}</div>
+                    <div style={{ fontSize: "13px", fontWeight: "600", color: COLORS.ink }}>{mockUser.full_name}</div>
+                    <div style={{ fontSize: "11px", color: COLORS.inkSoft }}>{mockUser.role_name}</div>
                   </div>
-                  <button onClick={() => { setShowUserMenu(false); goTo("profile"); }}
-                    style={{ width: "100%", padding: "10px 14px", display: "flex", alignItems: "center", gap: "8px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", color: COLORS.ink, textAlign: "left" }}
-                    onMouseEnter={(e) => e.target.style.background = COLORS.surface2}
-                    onMouseLeave={(e) => e.target.style.background = "none"}>
-                    <User size={14} /> My Profile
-                  </button>
-                  <button onClick={async () => { setShowUserMenu(false); await logout(); }}
-                    style={{ width: "100%", padding: "10px 14px", display: "flex", alignItems: "center", gap: "8px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", color: COLORS.bad, textAlign: "left", borderTop: `1px solid ${COLORS.line}` }}
-                    onMouseEnter={(e) => e.target.style.background = COLORS.gameSoft}
-                    onMouseLeave={(e) => e.target.style.background = "none"}>
-                    <LogOut size={14} /> Sign Out
-                  </button>
                 </div>
               )}
             </div>

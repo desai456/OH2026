@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import { Gavel, Plus, Download, Check, X } from "lucide-react";
 import { COLORS } from "../../constants/config";
 import {
@@ -77,6 +77,32 @@ export default function GovernanceModule({ tab, onRefresh }) {
     }
   };
 
+  const handleExportAudits = () => {
+    if (!audits || audits.length === 0) return;
+    const headers = ["Title", "Department", "Auditor", "Date", "Findings", "Status"];
+    const rows = audits.map((r) => [
+      r.title,
+      r.dept,
+      r.auditor,
+      r.date,
+      r.findings,
+      r.status,
+    ]);
+
+    const csvContent = [headers, ...rows]
+      .map((e) => e.map((val) => `"${String(val).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `audits_report_${new Date().toISOString().split("T")[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="stack-lg">
       <SectionTitle eyebrow="Governance" title={tab} />
@@ -115,7 +141,7 @@ export default function GovernanceModule({ tab, onRefresh }) {
           <div className="panel-toolbar">
             <button className="btn-primary" style={{ background: COLORS.gov }} onClick={() => setShowAuditModal(true)}><Plus size={14} /> New audit</button>
             <div className="spacer" />
-            <button className="btn-ghost"><Download size={14} /> Export</button>
+            <button className="btn-ghost" onClick={handleExportAudits}><Download size={14} /> Export</button>
           </div>
           <DataTable
             columns={["Title", "Department", "Auditor", "Date", "Findings", "Status"]}
