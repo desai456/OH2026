@@ -37,11 +37,10 @@ def detect_anomaly(department, fuel_usage, electricity_usage, water_usage, carbo
         "carbon_emission": carbon_emission,
     }])
 
-    raw_pred = model.predict(row)[0]           # -1 anomaly, 1 normal
+    raw_pred = model.predict(row)[0]          
     is_anomaly = raw_pred == -1
 
-    # decision_function: higher = more normal, lower/negative = more anomalous.
-    # Convert to a 0-100% "confidence this is abnormal" score.
+    
     score = model.decision_function(row)[0]
     confidence = max(0, min(100, round((0.5 - score) * 100, 2)))
 
@@ -59,7 +58,7 @@ def detect_anomaly(department, fuel_usage, electricity_usage, water_usage, carbo
 
 
 if __name__ == "__main__":
-    # Example: Manufacturing suddenly spikes fuel/electricity/carbon
+   
     result = detect_anomaly(
         department="Manufacturing",
         fuel_usage=950,          # ~10x normal
