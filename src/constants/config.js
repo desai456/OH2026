@@ -1,4 +1,4 @@
-import {
+﻿import {
   LayoutDashboard, Leaf, Users, ShieldCheck, Trophy, FileBarChart2, Settings as SettingsIcon
 } from "lucide-react";
 
@@ -30,4 +30,14 @@ export const DEFAULT_TABS = {
 export const REPORT_TAB_KEY = {
   "Environmental report": "environmental", "Social report": "social",
   "Governance report": "governance", "ESG summary": "summary",
+};
+
+
+// Role-to-module access mapping
+export const ROLE_MODULE_ACCESS = {
+  "Super Admin": ["dashboard", "environmental", "social", "governance", "gamification", "reports", "settings", "admin", "profile"],
+  "ESG Admin": ["dashboard", "environmental", "social", "governance", "reports", "profile"],
+  "Department Manager": ["dashboard", "social", "gamification", "reports", "profile"],
+  "Employee": ["dashboard", "social", "gamification", "profile"],
+  "Auditor": ["dashboard", "governance", "reports", "profile"],
 };

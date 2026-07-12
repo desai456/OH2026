@@ -1,4 +1,4 @@
-import os
+﻿import os
 import subprocess
 import joblib
 import pandas as pd
@@ -51,25 +51,25 @@ def startup_populate():
 
         
         factors = [
-            models.EmissionFactor(category="Diesel (fleet)", unit="litre", factor="2.68 kg CO₂e", source="DEFRA 2026", status="Active"),
-            models.EmissionFactor(category="Grid electricity", unit="kWh", factor="0.71 kg CO₂e", source="CEA India", status="Active"),
-            models.EmissionFactor(category="Air travel (domestic)", unit="passenger-km", factor="0.15 kg CO₂e", source="DEFRA 2026", status="Active"),
-            models.EmissionFactor(category="Packaging (cardboard)", unit="kg", factor="0.94 kg CO₂e", source="Internal LCA", status="Draft"),
-            models.EmissionFactor(category="Natural gas", unit="m³", factor="2.03 kg CO₂e", source="DEFRA 2026", status="Active"),
+            models.EmissionFactor(category="Diesel (fleet)", unit="litre", factor="2.68 kg COâ‚‚e", source="DEFRA 2026", status="Active"),
+            models.EmissionFactor(category="Grid electricity", unit="kWh", factor="0.71 kg COâ‚‚e", source="CEA India", status="Active"),
+            models.EmissionFactor(category="Air travel (domestic)", unit="passenger-km", factor="0.15 kg COâ‚‚e", source="DEFRA 2026", status="Active"),
+            models.EmissionFactor(category="Packaging (cardboard)", unit="kg", factor="0.94 kg COâ‚‚e", source="Internal LCA", status="Draft"),
+            models.EmissionFactor(category="Natural gas", unit="mÂ³", factor="2.03 kg COâ‚‚e", source="DEFRA 2026", status="Active"),
         ]
         db.add_all(factors)
 
         
         products = [
-            models.ProductProfile(product="EcoLine Packaging A2", footprint="0.42 kg CO₂e / unit", recyclable="92%", cert="FSC Certified"),
-            models.ProductProfile(product="Industrial Component X9", footprint="3.1 kg CO₂e / unit", recyclable="48%", cert="—"),
-            models.ProductProfile(product="Retail Bag – Kraft", footprint="0.08 kg CO₂e / unit", recyclable="100%", cert="Compostable"),
+            models.ProductProfile(product="EcoLine Packaging A2", footprint="0.42 kg COâ‚‚e / unit", recyclable="92%", cert="FSC Certified"),
+            models.ProductProfile(product="Industrial Component X9", footprint="3.1 kg COâ‚‚e / unit", recyclable="48%", cert="â€”"),
+            models.ProductProfile(product="Retail Bag â€“ Kraft", footprint="0.08 kg COâ‚‚e / unit", recyclable="100%", cert="Compostable"),
         ]
         db.add_all(products)
 
         
         goals = [
-            models.EnvironmentalGoal(name="Reduce fleet emissions", dept="Logistics", target=500, current=390, unit="t CO₂e", deadline="31 Dec 2026", status="Active"),
+            models.EnvironmentalGoal(name="Reduce fleet emissions", dept="Logistics", target=500, current=390, unit="t COâ‚‚e", deadline="31 Dec 2026", status="Active"),
             models.EnvironmentalGoal(name="Cut packaging waste", dept="Manufacturing", target=120, current=98, unit="t", deadline="30 Sep 2026", status="On track"),
             models.EnvironmentalGoal(name="Office energy cut", dept="Corporate", target=80, current=80, unit="MWh", deadline="30 Jun 2026", status="Completed"),
             models.EnvironmentalGoal(name="Water usage reduction", dept="R&D", target=40, current=22, unit="kL", deadline="31 Oct 2026", status="Active"),
@@ -136,7 +136,7 @@ def startup_populate():
             models.Reward(name="Eco tumbler", points=150, stock=34),
             models.Reward(name="Extra WFH day", points=300, stock=12),
             models.Reward(name="Plant-a-tree donation", points=100, stock=999),
-            models.Reward(name="Amazon voucher ₹1,000", points=800, stock=6),
+            models.Reward(name="Amazon voucher â‚¹1,000", points=800, stock=6),
         ]
         db.add_all(rewards)
 
@@ -164,7 +164,7 @@ def startup_populate():
             models.Participation(emp="Aditi Rao", activity="Tree plantation", proof="photo.jpg", points=50, status="Pending"),
             models.Participation(emp="Karan Shah", activity="ESG workshop", proof="cert.pdf", points=30, status="Approved"),
             models.Participation(emp="Rohan Verma", activity="Blood donation drive", proof="receipt.pdf", points=40, status="Pending"),
-            models.Participation(emp="Priya Menon", activity="Beach cleanup", proof="—", points=25, status="Approved"),
+            models.Participation(emp="Priya Menon", activity="Beach cleanup", proof="â€”", points=25, status="Approved"),
         ]
         db.add_all(parts)
 
@@ -172,7 +172,7 @@ def startup_populate():
         ch_parts = [
             models.ChallengeParticipation(challenge="Sustainability Sprint", emp="Aditi Rao", progress=80, proof="log.pdf", approval="Pending", xp=0),
             models.ChallengeParticipation(challenge="Recycle Challenge", emp="Karan Shah", progress=100, proof="photo.jpg", approval="Approved", xp=80),
-            models.ChallengeParticipation(challenge="Recycle Challenge", emp="Rohan Verma", progress=60, proof="—", approval="Pending", xp=0),
+            models.ChallengeParticipation(challenge="Recycle Challenge", emp="Rohan Verma", progress=60, proof="â€”", approval="Pending", xp=0),
             models.ChallengeParticipation(challenge="Energy Watch Q2", emp="Priya Menon", progress=100, proof="report.pdf", approval="Approved", xp=150),
         ]
         db.add_all(ch_parts)
@@ -182,7 +182,7 @@ def startup_populate():
             models.CarbonTransaction(date="10 Jul", dept="Logistics", source="Fleet", qty="1,240 L", co2e="3.32 t", mode="Auto"),
             models.CarbonTransaction(date="10 Jul", dept="Manufacturing", source="Purchase", qty="3,800 kg", co2e="3.57 t", mode="Auto"),
             models.CarbonTransaction(date="09 Jul", dept="Corporate", source="Expense", qty="6,120 kWh", co2e="4.35 t", mode="Auto"),
-            models.CarbonTransaction(date="08 Jul", dept="R&D", source="Manufacturing", qty="410 m³", co2e="0.83 t", mode="Manual"),
+            models.CarbonTransaction(date="08 Jul", dept="R&D", source="Manufacturing", qty="410 mÂ³", co2e="0.83 t", mode="Manual"),
             models.CarbonTransaction(date="07 Jul", dept="Sales", source="Fleet", qty="860 L", co2e="2.30 t", mode="Auto"),
         ]
         db.add_all(txs)
@@ -204,11 +204,11 @@ def startup_populate():
 
         # Seed notifications
         notifs = [
-            models.Notification(title="Priya completed ‘Zero Waste Week’", message="Priya Menon finished the challenge successfully.", tone="env", time="2h ago", is_read=False),
+            models.Notification(title="Priya completed â€˜Zero Waste Weekâ€™", message="Priya Menon finished the challenge successfully.", tone="env", time="2h ago", is_read=False),
             models.Notification(title="New compliance issue raised in Logistics", message="A high-severity issue was logged during the fleet audit.", tone="gov", time="4h ago", is_read=False),
             models.Notification(title="42 new Carbon Transactions logged (auto)", message="Automatically calculated carbon footprints from ERP logs.", tone="env", time="6h ago", is_read=False),
             models.Notification(title="R&D acknowledged Anti-Corruption Policy", message="Data indicates full compliance of R&D department.", tone="gov", time="1d ago", is_read=False),
-            models.Notification(title="Karan Shah unlocked ‘Carbon Saver’ badge", message="Unlock rule met: 3 environmental challenges completed.", tone="game", time="1d ago", is_read=False),
+            models.Notification(title="Karan Shah unlocked â€˜Carbon Saverâ€™ badge", message="Unlock rule met: 3 environmental challenges completed.", tone="game", time="1d ago", is_read=False),
         ]
         db.add_all(notifs)
 
@@ -251,7 +251,7 @@ def check_badge_rewards(db: Session, employee_name: str):
     existing_badges = db.query(models.Notification).filter(
         models.Notification.title.like(f"%{employee_name} unlocked%")
     ).all()
-    unlocked_names = [e.title.split("unlocked ‘")[1].split("’")[0] for e in existing_badges if "unlocked ‘" in e.title]
+    unlocked_names = [e.title.split("unlocked â€˜")[1].split("â€™")[0] for e in existing_badges if "unlocked â€˜" in e.title]
 
     # Rules mapping
     badge_rules = [
@@ -264,7 +264,7 @@ def check_badge_rewards(db: Session, employee_name: str):
         if rule["met"] and rule["name"] not in unlocked_names:
             add_notification(
                 db=db,
-                title=f"{employee_name} unlocked ‘{rule['name']}’ badge",
+                title=f"{employee_name} unlocked â€˜{rule['name']}â€™ badge",
                 message=f"Unlock rule met: {rule['rule']}.",
                 tone="game"
             )
@@ -412,7 +412,7 @@ def join_csr_activity(id: int, employee_name: str = "Nisha Patel", db: Session =
     new_part = models.Participation(
         emp=employee_name,
         activity=act.name,
-        proof="—",
+        proof="â€”",
         points=30,  # Standard points
         status="Pending"
     )
@@ -433,7 +433,7 @@ def update_participation_status(id: int, status: str, db: Session = Depends(get_
 
     # Evidence check business rule
     if status == "Approved" and get_config_val(db, "evidence", "true") == "true":
-        if not part.proof or part.proof == "—":
+        if not part.proof or part.proof == "â€”":
             raise HTTPException(status_code=400, detail="Cannot approve CSR activity participation without an attached proof file.")
 
     part.status = status
@@ -574,7 +574,7 @@ def join_challenge(id: int, employee_name: str = "Nisha Patel", db: Session = De
         challenge=chall.name,
         emp=employee_name,
         progress=10,
-        proof="—",
+        proof="â€”",
         approval="Pending",
         xp=0
     )
@@ -748,7 +748,7 @@ EMPLOYEE_DEPARTMENTS = {
 }
 
 def parse_report_date(date_str: str):
-    if not date_str or date_str == "—":
+    if not date_str or date_str == "â€”":
         return None
     date_str = date_str.strip()
     # Try "2026-07-20"
@@ -826,8 +826,8 @@ def generate_custom_report(
                     "module": "Environmental",
                     "metric": f"Goal: {g.name}",
                     "department": g.dept,
-                    "employee": "—",
-                    "challenge": "—",
+                    "employee": "â€”",
+                    "challenge": "â€”",
                     "category": "Emissions",
                     "value": f"{g.current} / {g.target} {g.unit}",
                     "status": g.status
@@ -846,10 +846,10 @@ def generate_custom_report(
                     "module": "Environmental",
                     "metric": f"Carbon Tx: {t.source}",
                     "department": t.dept,
-                    "employee": "—",
-                    "challenge": "—",
+                    "employee": "â€”",
+                    "challenge": "â€”",
                     "category": "Emissions",
-                    "value": f"{t.co2e} CO₂e ({t.qty})",
+                    "value": f"{t.co2e} COâ‚‚e ({t.qty})",
                     "status": t.mode
                 })
 
@@ -863,8 +863,8 @@ def generate_custom_report(
                     "module": "Environmental",
                     "metric": f"Factor: {f.category}",
                     "department": "All",
-                    "employee": "—",
-                    "challenge": "—",
+                    "employee": "â€”",
+                    "challenge": "â€”",
                     "category": f.category,
                     "value": f"{f.factor} / {f.unit}",
                     "status": f.status
@@ -883,9 +883,9 @@ def generate_custom_report(
                 report_data.append({
                     "module": "Social",
                     "metric": f"CSR Participation: {p.activity}",
-                    "department": EMPLOYEE_DEPARTMENTS.get(p.emp, "—"),
+                    "department": EMPLOYEE_DEPARTMENTS.get(p.emp, "â€”"),
                     "employee": p.emp,
-                    "challenge": "—",
+                    "challenge": "â€”",
                     "category": "CSR",
                     "value": f"{p.points} Points",
                     "status": p.status
@@ -898,8 +898,8 @@ def generate_custom_report(
                         "module": "Social",
                         "metric": f"CSR Activity: {a.name}",
                         "department": "All",
-                        "employee": "—",
-                        "challenge": "—",
+                        "employee": "â€”",
+                        "challenge": "â€”",
                         "category": "CSR",
                         "value": f"{a.joined} Joined",
                         "status": "Active" if a.joined > 0 else "Draft"
@@ -922,7 +922,7 @@ def generate_custom_report(
                     "metric": f"Issue: {i.issue}",
                     "department": i.dept,
                     "employee": i.owner,
-                    "challenge": "—",
+                    "challenge": "â€”",
                     "category": "Compliance",
                     "value": f"Due: {i.due}",
                     "status": i.status
@@ -942,7 +942,7 @@ def generate_custom_report(
                     "metric": f"Audit: {a.title}",
                     "department": a.dept,
                     "employee": a.auditor,
-                    "challenge": "—",
+                    "challenge": "â€”",
                     "category": "Compliance",
                     "value": a.findings,
                     "status": a.status
@@ -970,7 +970,7 @@ def generate_custom_report(
             report_data.append({
                 "module": "Gamification",
                 "metric": f"Challenge: {cp.challenge}",
-                "department": EMPLOYEE_DEPARTMENTS.get(cp.emp, "—"),
+                "department": EMPLOYEE_DEPARTMENTS.get(cp.emp, "â€”"),
                 "employee": cp.emp,
                 "challenge": cp.challenge,
                 "category": chall_cat,
@@ -1393,3 +1393,478 @@ def train_advanced_models():
         raise HTTPException(status_code=500, detail=f"Retraining error: {str(e)}")
 
 
+
+
+# ==================== AUTH & RBAC ENDPOINTS ====================
+from datetime import timedelta
+from .auth import (
+    hash_password, verify_password,
+    create_access_token, create_refresh_token, decode_token,
+    get_current_user, require_role,
+    check_rate_limit, record_attempt
+)
+from fastapi import Request as FastAPIRequest
+
+# ---------- Auth Seed Data ----------
+def seed_auth_data(db: Session):
+    """Seed roles, permissions, and default super admin user on first run."""
+    if db.query(models.Role).count() > 0:
+        return
+
+    # Create roles
+    roles_data = [
+        {"name": "Super Admin", "description": "Full system access", "is_system": True},
+        {"name": "ESG Admin", "description": "Manage Environmental, Social, Governance modules", "is_system": True},
+        {"name": "Department Manager", "description": "Manage department activities", "is_system": True},
+        {"name": "Employee", "description": "Basic employee access", "is_system": True},
+        {"name": "Auditor", "description": "Audit and compliance access", "is_system": True},
+    ]
+    role_objects = []
+    for rd in roles_data:
+        r = models.Role(**rd)
+        db.add(r)
+        role_objects.append(r)
+    db.flush()
+
+    # Create permissions
+    perms_data = [
+        {"name": "dashboard.view", "description": "View dashboard", "module": "dashboard"},
+        {"name": "environmental.view", "description": "View environmental data", "module": "environmental"},
+        {"name": "environmental.edit", "description": "Edit environmental data", "module": "environmental"},
+        {"name": "social.view", "description": "View social data", "module": "social"},
+        {"name": "social.edit", "description": "Edit social data", "module": "social"},
+        {"name": "governance.view", "description": "View governance data", "module": "governance"},
+        {"name": "governance.edit", "description": "Edit governance data", "module": "governance"},
+        {"name": "gamification.view", "description": "View gamification", "module": "gamification"},
+        {"name": "gamification.edit", "description": "Edit gamification", "module": "gamification"},
+        {"name": "reports.view", "description": "View reports", "module": "reports"},
+        {"name": "reports.edit", "description": "Generate reports", "module": "reports"},
+        {"name": "settings.view", "description": "View settings", "module": "settings"},
+        {"name": "settings.edit", "description": "Edit settings", "module": "settings"},
+        {"name": "admin.users", "description": "Manage users", "module": "admin"},
+        {"name": "admin.roles", "description": "Manage roles", "module": "admin"},
+    ]
+    perm_objects = []
+    for pd in perms_data:
+        p = models.Permission(**pd)
+        db.add(p)
+        perm_objects.append(p)
+    db.flush()
+
+    # Role-permission mappings
+    role_perm_map = {
+        "Super Admin": [p.id for p in perm_objects],  # all permissions
+        "ESG Admin": [p.id for p in perm_objects if p.module in ("dashboard", "environmental", "social", "governance", "reports")],
+        "Department Manager": [p.id for p in perm_objects if p.module in ("dashboard", "social", "gamification", "reports") and "edit" not in p.name],
+        "Employee": [p.id for p in perm_objects if p.module in ("dashboard", "social", "gamification") and "edit" not in p.name],
+        "Auditor": [p.id for p in perm_objects if p.module in ("dashboard", "governance", "reports") and "edit" not in p.name],
+    }
+    for role_obj in role_objects:
+        for perm_id in role_perm_map.get(role_obj.name, []):
+            db.add(models.RolePermission(role_id=role_obj.id, permission_id=perm_id))
+
+    # Create default Super Admin user
+    super_admin_role = next(r for r in role_objects if r.name == "Super Admin")
+    admin_user = models.User(
+        email="admin@ecosphere.com",
+        password_hash=hash_password("Admin@123"),
+        full_name="System Administrator",
+        phone="+91-9999999999",
+        department="Corporate",
+        designation="Super Admin",
+        role_id=super_admin_role.id,
+        is_active=True,
+    )
+    db.add(admin_user)
+    db.commit()
+    print("[AUTH] Seeded roles, permissions, and default Super Admin user.")
+
+# Inject seed_auth_data into startup
+_original_startup = startup_populate
+
+def _new_startup():
+    _original_startup()
+    db = next(get_db())
+    try:
+        seed_auth_data(db)
+    finally:
+        db.close()
+
+app.on_event("startup")(_new_startup)
+
+# ---------- Login / Logout / Refresh ----------
+@app.post("/api/auth/login")
+def auth_login(body: schemas.LoginRequest, request: FastAPIRequest, db: Session = Depends(get_db)):
+    client_ip = request.client.host if request.client else "unknown"
+    check_rate_limit(client_ip)
+    record_attempt(client_ip)
+
+    user = db.query(models.User).filter(models.User.email == body.email).first()
+    if not user or not verify_password(body.password, user.password_hash):
+        db.add(models.LoginHistory(user_id=user.id if user else 0, ip_address=client_ip, user_agent=str(request.headers.get("user-agent", "")), success=False))
+        db.commit()
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="Account is deactivated. Contact administrator.")
+
+    # Get role name
+    role = db.query(models.Role).filter(models.Role.id == user.role_id).first()
+    role_name = role.name if role else "Employee"
+
+    # Get permissions for role
+    role_perms = db.query(models.Permission.name).join(
+        models.RolePermission, models.RolePermission.permission_id == models.Permission.id
+    ).filter(models.RolePermission.role_id == user.role_id).all()
+    permissions = [p[0] for p in role_perms]
+
+    # Create tokens
+    expire_delta = timedelta(days=7) if body.remember_me else timedelta(minutes=30)
+    access_token = create_access_token(user.id, role_name, expires_delta=expire_delta)
+    refresh_tok, refresh_exp = create_refresh_token(user.id)
+
+    # Store refresh token
+    db.add(models.RefreshToken(user_id=user.id, token=refresh_tok, expires_at=refresh_exp))
+
+    # Update last login
+    user.last_login = datetime.utcnow().isoformat()
+    db.add(models.LoginHistory(user_id=user.id, ip_address=client_ip, user_agent=str(request.headers.get("user-agent", "")), success=True))
+    db.commit()
+
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_tok,
+        "token_type": "bearer",
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "full_name": user.full_name,
+            "phone": user.phone,
+            "department": user.department,
+            "employee_id": user.employee_id,
+            "designation": user.designation,
+            "profile_image": user.profile_image,
+            "bio": user.bio,
+            "role_id": user.role_id,
+            "role_name": role_name,
+            "permissions": permissions,
+            "is_active": user.is_active,
+            "last_login": user.last_login,
+            "created_at": user.created_at,
+        }
+    }
+
+@app.post("/api/auth/logout")
+def auth_logout(body: schemas.RefreshTokenRequest, db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
+    token = db.query(models.RefreshToken).filter(
+        models.RefreshToken.token == body.refresh_token,
+        models.RefreshToken.user_id == user.id
+    ).first()
+    if token:
+        token.is_revoked = True
+        db.commit()
+    return {"message": "Logged out successfully"}
+
+@app.post("/api/auth/refresh")
+def auth_refresh(body: schemas.RefreshTokenRequest, db: Session = Depends(get_db)):
+    token_record = db.query(models.RefreshToken).filter(
+        models.RefreshToken.token == body.refresh_token,
+        models.RefreshToken.is_revoked == False
+    ).first()
+    if not token_record:
+        raise HTTPException(status_code=401, detail="Invalid or revoked refresh token")
+    if datetime.fromisoformat(token_record.expires_at) < datetime.utcnow():
+        raise HTTPException(status_code=401, detail="Refresh token expired")
+
+    user = db.query(models.User).filter(models.User.id == token_record.user_id).first()
+    if not user or not user.is_active:
+        raise HTTPException(status_code=401, detail="User not found or inactive")
+
+    role = db.query(models.Role).filter(models.Role.id == user.role_id).first()
+    role_name = role.name if role else "Employee"
+
+    # Get permissions
+    role_perms = db.query(models.Permission.name).join(
+        models.RolePermission, models.RolePermission.permission_id == models.Permission.id
+    ).filter(models.RolePermission.role_id == user.role_id).all()
+    permissions = [p[0] for p in role_perms]
+
+    access_token = create_access_token(user.id, role_name)
+
+    # Revoke old refresh token and issue new one
+    token_record.is_revoked = True
+    new_refresh, new_exp = create_refresh_token(user.id)
+    db.add(models.RefreshToken(user_id=user.id, token=new_refresh, expires_at=new_exp))
+    db.commit()
+
+    return {
+        "access_token": access_token,
+        "refresh_token": new_refresh,
+        "token_type": "bearer",
+        "user": {
+            "id": user.id, "email": user.email, "full_name": user.full_name,
+            "phone": user.phone, "department": user.department,
+            "employee_id": user.employee_id, "designation": user.designation,
+            "profile_image": user.profile_image, "bio": user.bio,
+            "role_id": user.role_id, "role_name": role_name,
+            "permissions": permissions,
+            "is_active": user.is_active, "last_login": user.last_login,
+            "created_at": user.created_at,
+        }
+    }
+
+# ---------- Profile ----------
+@app.get("/api/auth/me")
+def get_profile(user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    role = db.query(models.Role).filter(models.Role.id == user.role_id).first()
+    role_perms = db.query(models.Permission.name).join(
+        models.RolePermission, models.RolePermission.permission_id == models.Permission.id
+    ).filter(models.RolePermission.role_id == user.role_id).all()
+    return {
+        "id": user.id, "email": user.email, "full_name": user.full_name,
+        "phone": user.phone, "department": user.department,
+        "employee_id": user.employee_id, "designation": user.designation,
+        "profile_image": user.profile_image, "bio": user.bio,
+        "role_id": user.role_id, "role_name": role.name if role else "Employee",
+        "permissions": [p[0] for p in role_perms],
+        "is_active": user.is_active, "last_login": user.last_login,
+        "created_at": user.created_at,
+    }
+
+@app.put("/api/auth/me")
+def update_profile(body: schemas.UserUpdate, user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if body.full_name is not None: user.full_name = body.full_name
+    if body.phone is not None: user.phone = body.phone
+    if body.department is not None: user.department = body.department
+    if body.designation is not None: user.designation = body.designation
+    if body.bio is not None: user.bio = body.bio
+    if body.profile_image is not None: user.profile_image = body.profile_image
+    db.commit()
+    return {"message": "Profile updated"}
+
+@app.put("/api/auth/change-password")
+def change_password(body: schemas.ChangePasswordRequest, user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if not verify_password(body.current_password, user.password_hash):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    if len(body.new_password) < 6:
+        raise HTTPException(status_code=400, detail="New password must be at least 6 characters")
+    user.password_hash = hash_password(body.new_password)
+    db.commit()
+    return {"message": "Password changed successfully"}
+
+# ---------- Admin: User Management (Super Admin only) ----------
+@app.get("/api/admin/users")
+def list_users(user: models.User = Depends(require_role("Super Admin")), db: Session = Depends(get_db)):
+    users = db.query(models.User).all()
+    result = []
+    for u in users:
+        role = db.query(models.Role).filter(models.Role.id == u.role_id).first()
+        result.append({
+            "id": u.id, "email": u.email, "full_name": u.full_name,
+            "phone": u.phone, "department": u.department,
+            "employee_id": u.employee_id, "designation": u.designation,
+            "role_id": u.role_id, "role_name": role.name if role else "Unknown",
+            "is_active": u.is_active, "last_login": u.last_login,
+            "created_at": u.created_at,
+        })
+    return result
+
+@app.post("/api/admin/users")
+def create_user(body: schemas.UserCreate, user: models.User = Depends(require_role("Super Admin")), db: Session = Depends(get_db)):
+    existing = db.query(models.User).filter(models.User.email == body.email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="User with this email already exists")
+    role = db.query(models.Role).filter(models.Role.id == body.role_id).first()
+    if not role:
+        raise HTTPException(status_code=400, detail="Invalid role_id")
+    new_user = models.User(
+        email=body.email,
+        password_hash=hash_password(body.password),
+        full_name=body.full_name,
+        phone=body.phone,
+        department=body.department,
+        employee_id=body.employee_id,
+        designation=body.designation,
+        role_id=body.role_id,
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return {"message": "User created", "user_id": new_user.id}
+
+@app.put("/api/admin/users/{user_id}")
+def update_user(user_id: int, body: schemas.AdminUserUpdate, user: models.User = Depends(require_role("Super Admin")), db: Session = Depends(get_db)):
+    target = db.query(models.User).filter(models.User.id == user_id).first()
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found")
+    if body.full_name is not None: target.full_name = body.full_name
+    if body.phone is not None: target.phone = body.phone
+    if body.department is not None: target.department = body.department
+    if body.designation is not None: target.designation = body.designation
+    if body.role_id is not None: target.role_id = body.role_id
+    if body.is_active is not None: target.is_active = body.is_active
+    db.commit()
+    return {"message": "User updated"}
+
+@app.delete("/api/admin/users/{user_id}")
+def deactivate_user(user_id: int, user: models.User = Depends(require_role("Super Admin")), db: Session = Depends(get_db)):
+    target = db.query(models.User).filter(models.User.id == user_id).first()
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found")
+    if target.id == user.id:
+        raise HTTPException(status_code=400, detail="Cannot deactivate yourself")
+    target.is_active = False
+    db.commit()
+    return {"message": "User deactivated"}
+
+# ---------- Admin: Roles & Permissions ----------
+@app.get("/api/admin/roles")
+def list_roles(user: models.User = Depends(require_role("Super Admin")), db: Session = Depends(get_db)):
+    roles = db.query(models.Role).all()
+    result = []
+    for r in roles:
+        perms = db.query(models.Permission).join(
+            models.RolePermission, models.RolePermission.permission_id == models.Permission.id
+        ).filter(models.RolePermission.role_id == r.id).all()
+        result.append({
+            "id": r.id, "name": r.name, "description": r.description,
+            "is_system": r.is_system,
+            "permissions": [{"id": p.id, "name": p.name, "module": p.module, "description": p.description} for p in perms]
+        })
+    return result
+
+@app.get("/api/admin/permissions")
+def list_permissions(user: models.User = Depends(require_role("Super Admin")), db: Session = Depends(get_db)):
+    return [{"id": p.id, "name": p.name, "module": p.module, "description": p.description}
+            for p in db.query(models.Permission).all()]
+
+@app.put("/api/admin/roles/{role_id}/permissions")
+def update_role_permissions(role_id: int, body: schemas.RolePermissionUpdate, user: models.User = Depends(require_role("Super Admin")), db: Session = Depends(get_db)):
+    role = db.query(models.Role).filter(models.Role.id == role_id).first()
+    if not role:
+        raise HTTPException(status_code=404, detail="Role not found")
+    db.query(models.RolePermission).filter(models.RolePermission.role_id == role_id).delete()
+    for pid in body.permission_ids:
+        db.add(models.RolePermission(role_id=role_id, permission_id=pid))
+    db.commit()
+    return {"message": "Role permissions updated"}
+
+# ---------- Admin: Login History ----------
+@app.get("/api/admin/login-history")
+def get_login_history(user: models.User = Depends(require_role("Super Admin")), db: Session = Depends(get_db)):
+    history = db.query(models.LoginHistory).order_by(models.LoginHistory.id.desc()).limit(100).all()
+    result = []
+    for h in history:
+        u = db.query(models.User).filter(models.User.id == h.user_id).first()
+        result.append({
+            "id": h.id, "user_email": u.email if u else "Unknown",
+            "user_name": u.full_name if u else "Unknown",
+            "ip_address": h.ip_address, "user_agent": h.user_agent,
+            "login_at": h.login_at, "success": h.success,
+        })
+    return result
+
+
+
+# ==================== GAMIFICATION REWARDS IMPROVEMENTS ====================
+
+@app.get("/api/gamification/employee-balance")
+def get_employee_balance(employee_name: str = "Nisha Patel", db: Session = Depends(get_db)):
+    """Get live points balance and XP for a specific employee."""
+    emp = db.query(models.Employee).filter(models.Employee.name == employee_name).first()
+    if not emp:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    return {
+        "name": emp.name,
+        "points": emp.points,
+        "xp": emp.xp,
+        "email": emp.email
+    }
+
+@app.get("/api/gamification/redemption-history")
+def get_redemption_history(employee_name: str = "Nisha Patel", db: Session = Depends(get_db)):
+    """Get redemption history for an employee."""
+    history = db.query(models.RedemptionHistory).filter(
+        models.RedemptionHistory.employee_name == employee_name
+    ).order_by(models.RedemptionHistory.id.desc()).limit(50).all()
+    return [
+        {
+            "id": h.id,
+            "reward_name": h.reward_name,
+            "points_spent": h.points_spent,
+            "redeemed_at": h.redeemed_at,
+        }
+        for h in history
+    ]
+
+@app.post("/api/gamification/redeem-v2")
+def redeem_reward_v2(reward_id: int, employee_name: str = "Nisha Patel", db: Session = Depends(get_db)):
+    """Enhanced redeem endpoint with history tracking and better error messages."""
+    reward = db.query(models.Reward).filter(models.Reward.id == reward_id).first()
+    if not reward:
+        raise HTTPException(status_code=404, detail="Reward not found")
+
+    if reward.stock <= 0:
+        raise HTTPException(status_code=400, detail="This reward is out of stock")
+
+    emp = db.query(models.Employee).filter(models.Employee.name == employee_name).first()
+    if not emp:
+        raise HTTPException(status_code=404, detail=f"Employee '{employee_name}' not found in the system")
+
+    if emp.points < reward.points:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Insufficient points. You have {emp.points} pts but need {reward.points} pts."
+        )
+
+    # Deduct points and reduce stock
+    emp.points -= reward.points
+    reward.stock -= 1
+
+    # Record history
+    db.add(models.RedemptionHistory(
+        employee_name=employee_name,
+        reward_id=reward.id,
+        reward_name=reward.name,
+        points_spent=reward.points
+    ))
+    db.flush()
+    db.commit()
+
+    add_notification(
+        db=db,
+        title="Reward Redeemed! 🎁",
+        message=f"{employee_name} redeemed '{reward.name}' for {reward.points} pts. Remaining balance: {emp.points} pts.",
+        tone="game"
+    )
+
+    return {
+        "message": f"Successfully redeemed '{reward.name}'!",
+        "reward_name": reward.name,
+        "points_spent": reward.points,
+        "new_balance": emp.points,
+        "remaining_stock": reward.stock
+    }
+
+@app.get("/api/gamification/rewards-enhanced")
+def get_rewards_enhanced(employee_name: str = "Nisha Patel", db: Session = Depends(get_db)):
+    """Get rewards with employee's redemption count per reward."""
+    rewards = db.query(models.Reward).all()
+    emp = db.query(models.Employee).filter(models.Employee.name == employee_name).first()
+    emp_points = emp.points if emp else 0
+
+    result = []
+    for r in rewards:
+        times_redeemed = db.query(models.RedemptionHistory).filter(
+            models.RedemptionHistory.employee_name == employee_name,
+            models.RedemptionHistory.reward_id == r.id
+        ).count()
+        result.append({
+            "id": r.id,
+            "name": r.name,
+            "points": r.points,
+            "stock": r.stock,
+            "can_afford": emp_points >= r.points,
+            "times_redeemed": times_redeemed,
+        })
+    return result
