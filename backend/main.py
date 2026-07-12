@@ -12,7 +12,7 @@ from typing import List, Optional
 from .database import engine, Base, get_db
 from . import models, schemas
 
-# Create tables
+
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="EcoSphere ESG API", version="1.0.0")
@@ -25,7 +25,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Startup DB Seeding
+
 @app.on_event("startup")
 def startup_populate():
     db = next(get_db())
@@ -40,7 +40,7 @@ def startup_populate():
         ]
         db.add_all(depts)
 
-        # Seed categories
+        
         cats = [
             models.Category(name="Tree Plantation", type="CSR Activity", status="Active"),
             models.Category(name="Blood Donation", type="CSR Activity", status="Active"),
@@ -49,7 +49,7 @@ def startup_populate():
         ]
         db.add_all(cats)
 
-        # Seed factors
+        
         factors = [
             models.EmissionFactor(category="Diesel (fleet)", unit="litre", factor="2.68 kg CO₂e", source="DEFRA 2026", status="Active"),
             models.EmissionFactor(category="Grid electricity", unit="kWh", factor="0.71 kg CO₂e", source="CEA India", status="Active"),
@@ -59,7 +59,7 @@ def startup_populate():
         ]
         db.add_all(factors)
 
-        # Seed products
+        
         products = [
             models.ProductProfile(product="EcoLine Packaging A2", footprint="0.42 kg CO₂e / unit", recyclable="92%", cert="FSC Certified"),
             models.ProductProfile(product="Industrial Component X9", footprint="3.1 kg CO₂e / unit", recyclable="48%", cert="—"),
@@ -67,7 +67,7 @@ def startup_populate():
         ]
         db.add_all(products)
 
-        # Seed goals
+        
         goals = [
             models.EnvironmentalGoal(name="Reduce fleet emissions", dept="Logistics", target=500, current=390, unit="t CO₂e", deadline="31 Dec 2026", status="Active"),
             models.EnvironmentalGoal(name="Cut packaging waste", dept="Manufacturing", target=120, current=98, unit="t", deadline="30 Sep 2026", status="On track"),
@@ -77,7 +77,7 @@ def startup_populate():
         ]
         db.add_all(goals)
 
-        # Seed policies
+        
         policies = [
             models.Policy(name="Anti-Corruption Policy", owner="Legal", version="v3.2", updated="12 Mar 2026"),
             models.Policy(name="Data Privacy Policy", owner="IT Governance", version="v2.0", updated="01 Feb 2026"),
@@ -86,7 +86,7 @@ def startup_populate():
         ]
         db.add_all(policies)
 
-        # Seed acknowledgements
+        
         acks = [
             models.PolicyAcknowledgement(dept="Manufacturing", acknowledged=96),
             models.PolicyAcknowledgement(dept="Sales", acknowledged=88),
@@ -96,7 +96,7 @@ def startup_populate():
         ]
         db.add_all(acks)
 
-        # Seed audits
+        
         audits = [
             models.Audit(title="Q2 waste audit", dept="Manufacturing", auditor="S. Nair", date="12 Jun 2026", findings="3 minor issues", status="Completed"),
             models.Audit(title="Vendor compliance check", dept="Procurement", auditor="R. Iyer", date="01 Jul 2026", findings="1 open issue", status="Under review"),
@@ -112,7 +112,7 @@ def startup_populate():
         ]
         db.add_all(issues)
 
-        # Seed challenges
+        
         challs = [
             models.Challenge(name="Sustainability Sprint", xp=200, difficulty="Hard", deadline="20 Jul", status="Active", category="Environmental"),
             models.Challenge(name="Recycle Challenge", xp=80, difficulty="Easy", deadline="15 Jul", status="Active", category="Environmental"),
@@ -122,7 +122,7 @@ def startup_populate():
         ]
         db.add_all(challs)
 
-        # Seed badges
+        
         badges = [
             models.Badge(name="Green Beginner", rule="Earn 100 XP", icon="Sparkles"),
             models.Badge(name="Carbon Saver", rule="Complete 3 environmental challenges", icon="Leaf"),
@@ -131,7 +131,7 @@ def startup_populate():
         ]
         db.add_all(badges)
 
-        # Seed rewards
+        
         rewards = [
             models.Reward(name="Eco tumbler", points=150, stock=34),
             models.Reward(name="Extra WFH day", points=300, stock=12),
@@ -150,7 +150,7 @@ def startup_populate():
         ]
         db.add_all(emps)
 
-        # Seed CSR Activities
+        
         csrs = [
             models.CSRActivity(name="Tree plantation", icon="TreePine", joined=24, evidence=True, tone="env"),
             models.CSRActivity(name="Blood donation drive", icon="HeartPulse", joined=18, evidence=True, tone="social"),
@@ -159,7 +159,7 @@ def startup_populate():
         ]
         db.add_all(csrs)
 
-        # Seed participation queue
+        
         parts = [
             models.Participation(emp="Aditi Rao", activity="Tree plantation", proof="photo.jpg", points=50, status="Pending"),
             models.Participation(emp="Karan Shah", activity="ESG workshop", proof="cert.pdf", points=30, status="Approved"),
@@ -168,7 +168,7 @@ def startup_populate():
         ]
         db.add_all(parts)
 
-        # Seed challenge participation
+        
         ch_parts = [
             models.ChallengeParticipation(challenge="Sustainability Sprint", emp="Aditi Rao", progress=80, proof="log.pdf", approval="Pending", xp=0),
             models.ChallengeParticipation(challenge="Recycle Challenge", emp="Karan Shah", progress=100, proof="photo.jpg", approval="Approved", xp=80),
@@ -177,7 +177,7 @@ def startup_populate():
         ]
         db.add_all(ch_parts)
 
-        # Seed carbon transactions
+    
         txs = [
             models.CarbonTransaction(date="10 Jul", dept="Logistics", source="Fleet", qty="1,240 L", co2e="3.32 t", mode="Auto"),
             models.CarbonTransaction(date="10 Jul", dept="Manufacturing", source="Purchase", qty="3,800 kg", co2e="3.57 t", mode="Auto"),
