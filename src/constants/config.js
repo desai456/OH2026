@@ -14,7 +14,7 @@ export const COLORS = {
 
 export const NAV_TREE = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, tone: "ink", tabs: [] },
-  { id: "environmental", label: "Environmental", icon: Leaf, tone: "env", tabs: ["Emission factors", "Product ESG profiles", "Carbon transactions", "Environmental goals"] },
+  { id: "environmental", label: "Environmental", icon: Leaf, tone: "env", tabs: ["Emission factors", "Product ESG profiles", "Carbon transactions", "Environmental goals", "Emissions forecast (ML)"] },
   { id: "social", label: "Social", icon: Users, tone: "social", tabs: ["CSR activities", "Employee participation", "Diversity dashboard"] },
   { id: "governance", label: "Governance", icon: ShieldCheck, tone: "gov", tabs: ["Policies", "Policy acknowledgements", "Audits", "Compliance issues"] },
   { id: "gamification", label: "Gamification", icon: Trophy, tone: "game", tabs: ["Challenges", "Challenge participation", "Badges", "Rewards", "Leaderboard"] },

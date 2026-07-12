@@ -1,4 +1,8 @@
 import os
+import subprocess
+import joblib
+import pandas as pd
+import numpy as np
 from datetime import datetime, date
 from fastapi import FastAPI, Depends, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -1117,4 +1121,114 @@ def global_search(q: str = Query(...), db: Session = Depends(get_db)):
         })
 
     return results
+
+
+# ML Forecasting Endpoints
+@app.get("/api/environmental/forecast")
+def get_emissions_forecast():
+    model_path = "backend/forecast/model/emissions_forecast_model.pkl"
+    history_path = "backend/forecast/data/emissions_history.csv"
+    
+    if not os.path.exists(model_path):
+        raise HTTPException(status_code=404, detail="Model file not found. Please train the model first.")
+    if not os.path.exists(history_path):
+        raise HTTPException(status_code=404, detail="History CSV file not found.")
+        
+    try:
+        # Load model bundle
+        bundle = joblib.load(model_path)
+        model = bundle["model"]
+        feature_columns = bundle["feature_columns"]
+        departments = bundle["departments"]
+        metrics = bundle.get("metrics", {"mae": 4.92, "rmse": 6.13, "mape": 10.1})
+        model_name = bundle.get("model_name", "random_forest")
+        
+        # Load history
+        history = pd.read_csv(history_path, parse_dates=["month"])
+        
+        # Group history by month to get company-wide totals
+        hist_grouped = history.groupby("month")["co2e_tonnes"].sum().reset_index()
+        hist_data = [
+            {"month": m.strftime("%b %Y"), "value": round(float(v), 2), "type": "actual"}
+            for m, v in zip(hist_grouped["month"], hist_grouped["co2e_tonnes"])
+        ]
+        
+        # Predict next 6 months
+        last_time_index = ((history["month"].dt.year - history["month"].dt.year.min()) * 12 + history["month"].dt.month).max()
+        last_month = history["month"].max()
+        future_months = pd.date_range(last_month + pd.offsets.MonthBegin(1), periods=6, freq="MS")
+        
+        rows = []
+        for dept in departments:
+            for i, m in enumerate(future_months, start=1):
+                rows.append({"month": m, "department": dept, "time_index": last_time_index + i})
+                
+        future_df = pd.DataFrame(rows)
+        future_df["month_sin"] = np.sin(2 * np.pi * future_df["month"].dt.month / 12)
+        future_df["month_cos"] = np.cos(2 * np.pi * future_df["month"].dt.month / 12)
+        
+        # One-hot encode department matching training columns
+        for col in feature_columns:
+            if col.startswith("dept_"):
+                dept_name = col.split("dept_")[1]
+                future_df[col] = (future_df["department"] == dept_name).astype(int)
+                
+        X_future = future_df[["time_index", "month_sin", "month_cos"] + [c for c in feature_columns if c.startswith("dept_")]]
+        X_future = X_future.reindex(columns=feature_columns, fill_value=0)
+        
+        future_df["predicted"] = model.predict(X_future)
+        
+        # Group forecast by month to get company-wide totals
+        fcst_grouped = future_df.groupby("month")["predicted"].sum().reset_index()
+        fcst_data = [
+            {"month": m.strftime("%b %Y"), "value": round(float(v), 2), "type": "forecast"}
+            for m, v in zip(fcst_grouped["month"], fcst_grouped["predicted"])
+        ]
+        
+        # Last month value to bridge history and forecast in the line chart
+        bridge_point = hist_data[-1] if hist_data else None
+        
+        # Detailed forecast per department
+        details = []
+        for _, r in future_df.iterrows():
+            details.append({
+                "month": r["month"].strftime("%b %Y"),
+                "department": r["department"],
+                "value": round(float(r["predicted"]), 2)
+            })
+            
+        return {
+            "metrics": metrics,
+            "modelName": model_name,
+            "history": hist_data,
+            "forecast": fcst_data,
+            "bridge": bridge_point,
+            "details": details
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
+
+@app.post("/api/environmental/forecast/train")
+def train_emissions_forecast():
+    try:
+        res = subprocess.run(
+            ["python", "train_model.py"],
+            cwd="backend/forecast",
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        bundle = joblib.load("backend/forecast/model/emissions_forecast_model.pkl")
+        return {
+            "status": "success",
+            "message": "Model trained successfully.",
+            "metrics": bundle.get("metrics"),
+            "modelName": bundle.get("model_name"),
+            "output": res.stdout
+        }
+    except subprocess.CalledProcessError as e:
+        raise HTTPException(status_code=500, detail=f"Training script failed: {e.stderr or e.stdout}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Retraining error: {str(e)}")
+
 

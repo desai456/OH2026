@@ -78,3 +78,8 @@ export const generateCustomReport = (params) => {
 // Global Search
 export const getSearchResults = (q) => fetchAPI(`/search?q=${encodeURIComponent(q)}`);
 
+// ML Forecasting
+export const getEmissionsForecast = () => fetchAPI("/environmental/forecast");
+export const trainEmissionsModel = () => fetchAPI("/environmental/forecast/train", { method: "POST" });
+
+

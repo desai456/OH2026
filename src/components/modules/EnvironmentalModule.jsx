@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from "react";
-import { Plus, Download, X } from "lucide-react";
+import React, { useState, useEffect, useMemo } from "react";
+import { Plus, Download, X, BrainCircuit, RefreshCw, Gauge, BarChart } from "lucide-react";
+import { 
+  ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend 
+} from "recharts";
 import { COLORS } from "../../constants/config";
 import {
   getEnvironmentalGoals, createEnvironmentalGoal,
   getEmissionFactors, createEmissionFactor,
   getCarbonTransactions, createCarbonTransaction,
-  getProductProfiles
+  getProductProfiles, getEmissionsForecast, trainEmissionsModel
 } from "../../constants/api";
 import SectionTitle from "../common/SectionTitle";
 import DataTable from "../common/DataTable";
@@ -42,9 +45,66 @@ export default function EnvironmentalModule({ tab, onRefresh }) {
     }
   };
 
+  // ML Forecasting state
+  const [forecastData, setForecastData] = useState(null);
+  const [loadingForecast, setLoadingForecast] = useState(false);
+  const [trainingModel, setTrainingModel] = useState(false);
+
+  const loadForecast = async () => {
+    setLoadingForecast(true);
+    try {
+      const data = await getEmissionsForecast();
+      setForecastData(data);
+    } catch (err) {
+      console.error("Error loading emissions forecast:", err);
+    } finally {
+      setLoadingForecast(false);
+    }
+  };
+
+  const handleRetrain = async () => {
+    setTrainingModel(true);
+    try {
+      const res = await trainEmissionsModel();
+      alert(`Model trained successfully!\nBest Model: ${res.modelName}\nMAE: ${res.metrics.mae} t CO₂e\nMAPE: ${res.metrics.mape}%`);
+      loadForecast();
+    } catch (err) {
+      alert("Error training model: " + err.message);
+    } finally {
+      setTrainingModel(false);
+    }
+  };
+
   useEffect(() => {
     loadAll();
+    if (tab === "Emissions forecast (ML)") {
+      loadForecast();
+    }
   }, [tab]);
+
+  const chartData = useMemo(() => {
+    if (!forecastData) return [];
+    const historyToDisplay = forecastData.history.slice(-12);
+    const formattedHistory = historyToDisplay.map(item => ({
+      month: item.month,
+      actual: item.value,
+      forecast: null
+    }));
+    const bridgePoint = forecastData.bridge ? {
+      month: forecastData.bridge.month,
+      actual: forecastData.bridge.value,
+      forecast: forecastData.bridge.value
+    } : null;
+    const formattedForecast = forecastData.forecast.map(item => ({
+      month: item.month,
+      actual: null,
+      forecast: item.value
+    }));
+    if (bridgePoint && formattedHistory.length > 0) {
+      formattedHistory[formattedHistory.length - 1] = bridgePoint;
+    }
+    return [...formattedHistory, ...formattedForecast];
+  }, [forecastData]);
 
   const handleAddGoal = async (e) => {
     e.preventDefault();
@@ -270,6 +330,96 @@ export default function EnvironmentalModule({ tab, onRefresh }) {
               <div className="mini-card-row"><span>Certification</span><span>{p.cert}</span></div>
             </div>
           ))}
+        </div>
+      )}
+
+      {tab === "Emissions forecast (ML)" && (
+        <div className="stack-lg">
+          <style>{`
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+            .spin {
+              animation: spin 1.2s linear infinite;
+            }
+          `}</style>
+          
+          {loadingForecast || !forecastData ? (
+            <div className="empty-note">Loading emissions forecast model data...</div>
+          ) : (
+            <>
+              {/* Metrics Grid */}
+              <div className="grid-2" style={{ gridTemplateColumns: "repeat(3, 1fr)", gap: "18px" }}>
+                <div className="panel" style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <div className="eyebrow" style={{ display: "flex", alignItems: "center", gap: "6px" }}><Gauge size={12} color={COLORS.social} /> Mean Absolute Error (MAE)</div>
+                  <div className="mono" style={{ fontSize: "24px", fontWeight: "600", color: COLORS.social }}>{forecastData.metrics.mae} t CO₂e</div>
+                  <div className="mini-note">Average prediction error margin on validation datasets. Lower is better.</div>
+                </div>
+                <div className="panel" style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <div className="eyebrow" style={{ display: "flex", alignItems: "center", gap: "6px" }}><BarChart size={12} color={COLORS.env} /> MAPE Error Percentage</div>
+                  <div className="mono" style={{ fontSize: "24px", fontWeight: "600", color: COLORS.env }}>{forecastData.metrics.mape}%</div>
+                  <div className="mini-note">Average percentage deviation of the forecast from the actual values.</div>
+                </div>
+                <div className="panel" style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <div className="eyebrow" style={{ display: "flex", alignItems: "center", gap: "6px" }}><BrainCircuit size={12} color={COLORS.game} /> Active Algorithm</div>
+                  <div style={{ fontSize: "16px", fontWeight: "600", color: COLORS.game, textTransform: "capitalize", margin: "4px 0" }}>{forecastData.modelName.replace("_", " ")}</div>
+                  <div className="mini-note">Chosen automatically during model evaluation as the best performer.</div>
+                </div>
+              </div>
+
+              {/* Chart Panel */}
+              <div className="panel">
+                <div className="section-title-row">
+                  <div>
+                    <div className="eyebrow">ML Carbon Forecasting</div>
+                    <div className="section-title">Actual vs. Forecasted Emissions (Company-wide)</div>
+                  </div>
+                  <button 
+                    className="btn-ghost" 
+                    onClick={handleRetrain} 
+                    disabled={trainingModel}
+                    style={{ opacity: trainingModel ? 0.6 : 1, display: "flex", alignItems: "center", gap: "8px" }}
+                  >
+                    <RefreshCw size={13} className={trainingModel ? "spin" : ""} /> {trainingModel ? "Training..." : "Retrain Model"}
+                  </button>
+                </div>
+                <div style={{ height: "300px", marginTop: "20px" }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke={COLORS.line} />
+                      <XAxis dataKey="month" stroke={COLORS.inkSoft} style={{ fontSize: 11 }} />
+                      <YAxis stroke={COLORS.inkSoft} style={{ fontSize: 11 }} label={{ value: "t CO₂e", angle: -90, position: "insideLeft", style: { fontSize: 11 } }} />
+                      <Tooltip contentStyle={{ background: COLORS.surface, border: `1px solid ${COLORS.line}`, borderRadius: 8 }} />
+                      <Legend wrapperStyle={{ fontSize: 12 }} />
+                      <Line type="monotone" dataKey="actual" name="Historical Actual" stroke={COLORS.env} strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} connectNulls={false} />
+                      <Line type="monotone" dataKey="forecast" name="ML Predicted Forecast" stroke={COLORS.social} strokeWidth={2.5} strokeDasharray="5 5" dot={{ r: 4 }} activeDot={{ r: 6 }} connectNulls={false} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Per-Department Forecast Table */}
+              <div className="panel">
+                <div className="section-title-row">
+                  <div>
+                    <div className="eyebrow">Detailed Output</div>
+                    <div className="section-title">Emissions Forecast per Department (Next 6 Months)</div>
+                  </div>
+                </div>
+                <DataTable
+                  columns={["Month", "Department", "Forecasted Carbon (t CO₂e)"]}
+                  rows={forecastData.details}
+                  renderCell={(r, c) => {
+                    if (c === "Month") return r.month;
+                    if (c === "Department") return r.department;
+                    if (c === "Forecasted Carbon (t CO₂e)") return <span className="mono cell-strong">{r.value} t</span>;
+                    return null;
+                  }}
+                />
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>
