@@ -36,7 +36,7 @@ def generate():
             "is_anomaly": 0,
         })
 
-    # Deliberate anomalies: sudden spikes (10x fuel, 5x electricity, etc.)
+    
     for _ in range(N_ANOMALIES):
         dept = rng.choice(DEPARTMENTS)
         fuel = rng.normal(100, 15) * rng.uniform(6, 10)
