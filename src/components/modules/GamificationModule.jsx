@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { ChevronRight, Check, X, Gift, Crown, Plus, Wallet, Star, ShoppingBag, Clock, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { COLORS } from "../../constants/config";
 import {
