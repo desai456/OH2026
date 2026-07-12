@@ -4,7 +4,7 @@ import { Leaf, Search, Bell, ChevronDown } from "lucide-react";
 // Config and constants
 import { COLORS, NAV_TREE, DEFAULT_TABS } from "./constants/config";
 
-// Application Programming Interface
+// API
 import { getDashboardSummary, getNotifications } from "./constants/api";
 
 // Styles
@@ -57,7 +57,7 @@ export default function EcoSphereApp() {
       case "social": return <SocialModule tab={currentTab} onRefresh={loadGlobalMetrics} />;
       case "governance": return <GovernanceModule tab={currentTab} onRefresh={loadGlobalMetrics} />;
       case "gamification": return <GamificationModule tab={currentTab} onRefresh={loadGlobalMetrics} />;
-      case "reports": return <ReportsModule tab={currentTab} onRefresh={loadGlobalMetrics} />;
+      case "reports": return <ReportsModule tab={currentTab} onRefresh={loadGlobalMetrics} goTo={goTo} />;
       case "settings": return <SettingsModule tab={currentTab} onRefresh={loadGlobalMetrics} />;
       default: return null;
     }
@@ -133,7 +133,7 @@ export default function EcoSphereApp() {
                 width: "320px",
                 maxHeight: "400px",
                 overflowY: "auto",
-                zIndex: 100,
+                zIndex: 1000,
                 padding: "12px"
               }}>
                 <div style={{ fontWeight: 600, marginBottom: "8px", borderBottom: `1px solid ${COLORS.line}`, paddingBottom: "4px" }}>Recent Notifications</div>

@@ -112,7 +112,7 @@ export default function GamificationModule({ tab, onRefresh }) {
             ))}
           </div>
           <div className="card-grid">
-            {challenges.filter((c) => c.status === stage).map((c) => (
+            {challenges.filter((c) => c.status === stage && !participation.some(p => p.challenge === c.name && p.emp === "Nisha Patel")).map((c) => (
               <div className="mini-card" key={c.id}>
                 <div className="between-row"><StatusPill status={c.difficulty} /><span className="mono xp-tag">{c.xp} XP</span></div>
                 <div className="mini-card-title" style={{ marginTop: 10 }}>{c.name}</div>
@@ -120,7 +120,7 @@ export default function GamificationModule({ tab, onRefresh }) {
                 <button className="btn-outline-full" style={{ borderColor: COLORS.game, color: COLORS.game }} onClick={() => handleJoin(c.id)}>Join challenge</button>
               </div>
             ))}
-            {challenges.filter((c) => c.status === stage).length === 0 && (
+            {challenges.filter((c) => c.status === stage && !participation.some(p => p.challenge === c.name && p.emp === "Nisha Patel")).length === 0 && (
               <div className="empty-note">No challenges in this stage right now.</div>
             )}
           </div>

@@ -539,6 +539,14 @@ def join_challenge(id: int, employee_name: str = "Nisha Patel", db: Session = De
     if not chall:
         raise HTTPException(status_code=404, detail="Challenge not found")
 
+    # Business rule: check if already joined
+    existing_join = db.query(models.ChallengeParticipation).filter(
+        models.ChallengeParticipation.challenge == chall.name,
+        models.ChallengeParticipation.emp == employee_name
+    ).first()
+    if existing_join:
+        raise HTTPException(status_code=400, detail=f"You have already joined the challenge '{chall.name}'.")
+
     new_part = models.ChallengeParticipation(
         challenge=chall.name,
         emp=employee_name,
@@ -560,6 +568,9 @@ def update_challenge_participation_status(id: int, status: str, db: Session = De
     part = db.query(models.ChallengeParticipation).filter(models.ChallengeParticipation.id == id).first()
     if not part:
         raise HTTPException(status_code=404, detail="Record not found")
+
+    if status == "Approved" and part.approval == "Approved":
+        raise HTTPException(status_code=400, detail="This challenge completion has already been approved.")
 
     part.approval = status
     if status == "Approved":
@@ -682,6 +693,14 @@ def save_configs(data: dict, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Configurations updated successfully"}
 
+@app.get("/api/settings/employees")
+def get_employees(db: Session = Depends(get_db)):
+    return [e.name for e in db.query(models.Employee).all()]
+
+@app.get("/api/settings/challenges")
+def get_challenges_list(db: Session = Depends(get_db)):
+    return [c.name for c in db.query(models.Challenge).all()]
+
 
 # Notifications Router
 @app.get("/api/notifications", response_model=List[schemas.NotificationSchema])
@@ -690,6 +709,61 @@ def get_notifications(db: Session = Depends(get_db)):
 
 
 # Custom Reports Router
+EMPLOYEE_DEPARTMENTS = {
+    "Nisha Patel": "Corporate",
+    "Priya Menon": "R&D",
+    "Aditi Rao": "Sales",
+    "Rohan Verma": "Logistics",
+    "Karan Shah": "Manufacturing",
+    "S. Nair": "Manufacturing",
+    "V. Kapoor": "Sales",
+    "A. Roy": "Logistics",
+    "N. Desai": "Corporate",
+    "P. Menon": "R&D",
+    "R. Iyer": "Procurement",
+    "M. Fernandes": "IT"
+}
+
+def parse_report_date(date_str: str):
+    if not date_str or date_str == "—":
+        return None
+    date_str = date_str.strip()
+    # Try "2026-07-20"
+    try:
+        return datetime.strptime(date_str, "%Y-%m-%d").date()
+    except ValueError:
+        pass
+    # Try "01 Jul 2026"
+    try:
+        return datetime.strptime(date_str, "%d %b %Y").date()
+    except ValueError:
+        pass
+    # Try "10 Jul" -> "10 Jul 2026"
+    try:
+        return datetime.strptime(f"{date_str} 2026", "%d %b %Y").date()
+    except ValueError:
+        pass
+    return None
+
+def is_date_in_range(date_str: str, date_range: str) -> bool:
+    if date_range in ["All", "All time", "All date ranges"]:
+        return True
+    d = parse_report_date(date_str)
+    if not d:
+        return True # Default to true so we don't hide unparseable/missing dates
+    
+    ref_date = date(2026, 7, 12) # Current local date is July 2026
+    if date_range == "This month":
+        return d.year == ref_date.year and d.month == ref_date.month
+    elif date_range == "This quarter":
+        ref_q = (ref_date.month - 1) // 3
+        d_q = (d.month - 1) // 3
+        return d.year == ref_date.year and d_q == ref_q
+    elif date_range == "Last 12 months":
+        delta = ref_date - d
+        return 0 <= delta.days <= 365
+    return True
+
 @app.get("/api/reports/custom")
 def generate_custom_report(
     department: str = "All departments",
@@ -700,44 +774,186 @@ def generate_custom_report(
     category: str = "All categories",
     db: Session = Depends(get_db)
 ):
-    # Simulated filtering and reporting content
     report_data = []
 
+    # Helper function to check employee department
+    def emp_matches_dept(emp_name: str) -> bool:
+        if department == "All departments":
+            return True
+        return EMPLOYEE_DEPARTMENTS.get(emp_name) == department
+
+    # 1. Environmental
     if module in ["All modules", "Environmental"]:
-        goals = db.query(models.EnvironmentalGoal).all()
-        for g in goals:
-            if department == "All departments" or g.dept == department:
+        # Goals
+        if category in ["All categories", "Emissions"]:
+            goals = db.query(models.EnvironmentalGoal).all()
+            for g in goals:
+                if department != "All departments" and g.dept != department:
+                    continue
+                if employee != "All employees":
+                    # Goals are not employee specific, so if user filters by employee, exclude goals
+                    continue
+                if challenge != "All challenges":
+                    # Goals are not challenge specific
+                    continue
+                if not is_date_in_range(g.deadline, date_range):
+                    continue
+                
                 report_data.append({
                     "module": "Environmental",
                     "metric": f"Goal: {g.name}",
                     "department": g.dept,
+                    "employee": "—",
+                    "challenge": "—",
+                    "category": "Emissions",
                     "value": f"{g.current} / {g.target} {g.unit}",
                     "status": g.status
                 })
 
-    if module in ["All modules", "Social"]:
-        parts = db.query(models.Participation).all()
-        for p in parts:
-            if employee == "All employees" or p.emp == employee:
+        # Carbon Transactions
+        if category in ["All categories", "Emissions"] and employee == "All employees" and challenge == "All challenges":
+            txs = db.query(models.CarbonTransaction).all()
+            for t in txs:
+                if department != "All departments" and t.dept != department:
+                    continue
+                if not is_date_in_range(t.date, date_range):
+                    continue
+                
+                report_data.append({
+                    "module": "Environmental",
+                    "metric": f"Carbon Tx: {t.source}",
+                    "department": t.dept,
+                    "employee": "—",
+                    "challenge": "—",
+                    "category": "Emissions",
+                    "value": f"{t.co2e} CO₂e ({t.qty})",
+                    "status": t.mode
+                })
+
+        # Emission Factors
+        if department == "All departments" and employee == "All employees" and challenge == "All challenges":
+            factors = db.query(models.EmissionFactor).all()
+            for f in factors:
+                if category != "All categories" and f.category != category:
+                    continue
+                report_data.append({
+                    "module": "Environmental",
+                    "metric": f"Factor: {f.category}",
+                    "department": "All",
+                    "employee": "—",
+                    "challenge": "—",
+                    "category": f.category,
+                    "value": f"{f.factor} / {f.unit}",
+                    "status": f.status
+                })
+
+    # 2. Social
+    if module in ["All modules", "Social"] and challenge == "All challenges":
+        if category in ["All categories", "CSR"]:
+            parts = db.query(models.Participation).all()
+            for p in parts:
+                if employee != "All employees" and p.emp != employee:
+                    continue
+                if not emp_matches_dept(p.emp):
+                    continue
+                # Date check: Participation queue has no explicit date in participation table, but let's assume valid
                 report_data.append({
                     "module": "Social",
-                    "metric": f"CSR: {p.activity}",
+                    "metric": f"CSR Participation: {p.activity}",
+                    "department": EMPLOYEE_DEPARTMENTS.get(p.emp, "—"),
                     "employee": p.emp,
+                    "challenge": "—",
+                    "category": "CSR",
                     "value": f"{p.points} Points",
                     "status": p.status
                 })
 
-    if module in ["All modules", "Governance"]:
-        issues = db.query(models.ComplianceIssue).all()
-        for i in issues:
-            if department == "All departments" or i.dept == department:
+            if employee == "All employees" and department == "All departments":
+                acts = db.query(models.CSRActivity).all()
+                for a in acts:
+                    report_data.append({
+                        "module": "Social",
+                        "metric": f"CSR Activity: {a.name}",
+                        "department": "All",
+                        "employee": "—",
+                        "challenge": "—",
+                        "category": "CSR",
+                        "value": f"{a.joined} Joined",
+                        "status": "Active" if a.joined > 0 else "Draft"
+                    })
+
+    # 3. Governance
+    if module in ["All modules", "Governance"] and challenge == "All challenges":
+        if category in ["All categories", "Compliance"]:
+            issues = db.query(models.ComplianceIssue).all()
+            for i in issues:
+                if department != "All departments" and i.dept != department:
+                    continue
+                if employee != "All employees" and i.owner != employee:
+                    continue
+                if not is_date_in_range(i.due, date_range):
+                    continue
+                
                 report_data.append({
                     "module": "Governance",
                     "metric": f"Issue: {i.issue}",
                     "department": i.dept,
+                    "employee": i.owner,
+                    "challenge": "—",
+                    "category": "Compliance",
                     "value": f"Due: {i.due}",
                     "status": i.status
                 })
+
+            auds = db.query(models.Audit).all()
+            for a in auds:
+                if department != "All departments" and a.dept != department:
+                    continue
+                if employee != "All employees" and a.auditor != employee:
+                    continue
+                if not is_date_in_range(a.date, date_range):
+                    continue
+                
+                report_data.append({
+                    "module": "Governance",
+                    "metric": f"Audit: {a.title}",
+                    "department": a.dept,
+                    "employee": a.auditor,
+                    "challenge": "—",
+                    "category": "Compliance",
+                    "value": a.findings,
+                    "status": a.status
+                })
+
+    # 4. Gamification / Challenges
+    if module in ["All modules", "Gamification"]:
+        challs = db.query(models.ChallengeParticipation).all()
+        for cp in challs:
+            if employee != "All employees" and cp.emp != employee:
+                continue
+            if not emp_matches_dept(cp.emp):
+                continue
+            if challenge != "All challenges" and cp.challenge != challenge:
+                continue
+            
+            # Look up category of this challenge
+            chall_obj = db.query(models.Challenge).filter(models.Challenge.name == cp.challenge).first()
+            chall_cat = chall_obj.category if chall_obj else "Challenge"
+            if category != "All categories" and category != chall_cat:
+                continue
+            if chall_obj and not is_date_in_range(chall_obj.deadline, date_range):
+                continue
+                
+            report_data.append({
+                "module": "Gamification",
+                "metric": f"Challenge: {cp.challenge}",
+                "department": EMPLOYEE_DEPARTMENTS.get(cp.emp, "—"),
+                "employee": cp.emp,
+                "challenge": cp.challenge,
+                "category": chall_cat,
+                "value": f"Progress: {cp.progress}%",
+                "status": cp.approval
+            })
 
     return {
         "filters": {

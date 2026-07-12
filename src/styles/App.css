@@ -75,6 +75,7 @@
 /* Main column */
 .main-col { display: flex; flex-direction: column; min-width: 0; }
 .topbar {
+  position: relative; z-index: 100;
   height: 58px; padding: 0 26px; display: flex; align-items: center; gap: 16px;
   border-bottom: 1px solid var(--color-line); background: rgba(251,250,245,0.9); backdrop-filter: blur(4px);
 }

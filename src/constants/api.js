@@ -63,6 +63,8 @@ export const getCategories = () => fetchAPI("/settings/categories");
 export const createCategory = (data) => fetchAPI("/settings/categories", { method: "POST", body: JSON.stringify(data) });
 export const getConfigs = () => fetchAPI("/settings/configs");
 export const saveConfigs = (data) => fetchAPI("/settings/configs", { method: "POST", body: JSON.stringify(data) });
+export const getEmployees = () => fetchAPI("/settings/employees");
+export const getChallengesList = () => fetchAPI("/settings/challenges");
 
 // Notifications
 export const getNotifications = () => fetchAPI("/notifications");
