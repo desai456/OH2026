@@ -5,13 +5,13 @@ import {
   Building2, User, Zap, Target, X 
 } from "lucide-react";
 
-// Config and constants
+
 import { COLORS, NAV_TREE, DEFAULT_TABS } from "./constants/config";
 
-// API
+
 import { getDashboardSummary, getNotifications, getSearchResults } from "./constants/api";
 
-// Styles
+
 import "./styles/App.css";
 
 // Modules
@@ -43,14 +43,14 @@ export default function EcoSphereApp() {
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
 
-  // Search Engine states
+  
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const searchInputRef = useRef(null);
 
-  // Trigger search when query changes
+
   useEffect(() => {
     if (!searchQuery.trim()) {
       setSearchResults([]);
