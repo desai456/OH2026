@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+﻿from pydantic import BaseModel
 from typing import Optional, List
 
 class DepartmentBase(BaseModel):
@@ -172,7 +172,7 @@ class CSRActivity(BaseModel):
 class ParticipationBase(BaseModel):
     emp: str
     activity: str
-    proof: Optional[str] = "—"
+    proof: Optional[str] = "â€”"
     points: int
     status: Optional[str] = "Pending"
 
@@ -188,7 +188,7 @@ class ChallengeParticipationBase(BaseModel):
     challenge: str
     emp: str
     progress: int
-    proof: Optional[str] = "—"
+    proof: Optional[str] = "â€”"
     approval: Optional[str] = "Pending"
     xp: Optional[int] = 0
 
@@ -231,3 +231,87 @@ class NotificationSchema(BaseModel):
     is_read: bool
     class Config:
         orm_mode = True
+
+
+# ==================== AUTH & RBAC SCHEMAS ====================
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+    remember_me: Optional[bool] = False
+
+class RoleSchema(BaseModel):
+    id: int
+    name: str
+    description: Optional[str] = None
+    is_system: Optional[bool] = True
+    class Config:
+        orm_mode = True
+
+class UserResponse(BaseModel):
+    id: int
+    email: str
+    full_name: str
+    phone: Optional[str] = None
+    department: Optional[str] = None
+    employee_id: Optional[int] = None
+    designation: Optional[str] = None
+    profile_image: Optional[str] = None
+    bio: Optional[str] = None
+    role_id: int
+    role_name: Optional[str] = None
+    is_active: bool
+    last_login: Optional[str] = None
+    created_at: Optional[str] = None
+    class Config:
+        orm_mode = True
+
+class LoginResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+    user: UserResponse
+
+class UserCreate(BaseModel):
+    email: str
+    password: str
+    full_name: str
+    phone: Optional[str] = None
+    department: Optional[str] = None
+    employee_id: Optional[int] = None
+    designation: Optional[str] = None
+    role_id: int
+
+class UserUpdate(BaseModel):
+    full_name: Optional[str] = None
+    phone: Optional[str] = None
+    department: Optional[str] = None
+    designation: Optional[str] = None
+    bio: Optional[str] = None
+    profile_image: Optional[str] = None
+
+class AdminUserUpdate(BaseModel):
+    full_name: Optional[str] = None
+    phone: Optional[str] = None
+    department: Optional[str] = None
+    designation: Optional[str] = None
+    role_id: Optional[int] = None
+    is_active: Optional[bool] = None
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
+
+class PermissionSchema(BaseModel):
+    id: int
+    name: str
+    description: Optional[str] = None
+    module: str
+    class Config:
+        orm_mode = True
+
+class RolePermissionUpdate(BaseModel):
+    permission_ids: List[int]

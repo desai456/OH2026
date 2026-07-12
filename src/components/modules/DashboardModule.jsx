@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar
 } from "recharts";
@@ -8,7 +8,7 @@ import { getDashboardSummary } from "../../constants/api";
 import ScoreRing from "../common/ScoreRing";
 import SectionTitle from "../common/SectionTitle";
 
-export default function DashboardModule({ onRefresh }) {
+export default function DashboardModule({ onRefresh, goTo }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -102,9 +102,9 @@ export default function DashboardModule({ onRefresh }) {
         <div className="panel">
           <SectionTitle title="Quick actions" />
           <div className="stack-sm">
-            <button className="action-btn" style={{ background: COLORS.env }} onClick={loadData}><Flame size={16} /> Log carbon data</button>
-            <button className="action-btn" style={{ background: COLORS.social }} onClick={loadData}><Trophy size={16} /> Start a challenge</button>
-            <button className="action-btn action-btn-outline"><FileBarChart2 size={16} /> View reports</button>
+            <button className="action-btn" style={{ background: COLORS.env }} onClick={() => goTo("environmental", "Carbon transactions")}><Flame size={16} /> Log carbon data</button>
+            <button className="action-btn" style={{ background: COLORS.social }} onClick={() => goTo("gamification", "Challenges")}><Trophy size={16} /> Start a challenge</button>
+            <button className="action-btn action-btn-outline" onClick={() => goTo("reports", "ESG summary")}><FileBarChart2 size={16} /> View reports</button>
           </div>
           <div className="divider-tick" />
           <div className="mini-note">Auto emission calculation is active — transactions are auto-generated from linked operations records.</div>

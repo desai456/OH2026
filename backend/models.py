@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, Numeric
+﻿from sqlalchemy import Column, Integer, String, Boolean, Numeric
 from .database import Base
 
 class Department(Base):
@@ -162,3 +162,73 @@ class Notification(Base):
     tone = Column(String, default="env")
     time = Column(String, nullable=False)
     is_read = Column(Boolean, default=False)
+
+
+# ==================== AUTH & RBAC MODELS ====================
+from sqlalchemy import ForeignKey, DateTime, Text
+from datetime import datetime
+
+class Role(Base):
+    __tablename__ = "roles"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, nullable=False)
+    description = Column(String)
+    is_system = Column(Boolean, default=True)
+
+class Permission(Base):
+    __tablename__ = "permissions"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, nullable=False)
+    description = Column(String)
+    module = Column(String, nullable=False)
+
+class RolePermission(Base):
+    __tablename__ = "role_permissions"
+    id = Column(Integer, primary_key=True, index=True)
+    role_id = Column(Integer, ForeignKey("roles.id"), nullable=False)
+    permission_id = Column(Integer, ForeignKey("permissions.id"), nullable=False)
+
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True, nullable=False)
+    password_hash = Column(String, nullable=False)
+    full_name = Column(String, nullable=False)
+    phone = Column(String)
+    department = Column(String)
+    employee_id = Column(Integer, ForeignKey("employees.id"), nullable=True)
+    designation = Column(String)
+    profile_image = Column(Text)
+    bio = Column(Text)
+    role_id = Column(Integer, ForeignKey("roles.id"), nullable=False)
+    is_active = Column(Boolean, default=True)
+    last_login = Column(String)
+    created_at = Column(String, default=lambda: datetime.utcnow().isoformat())
+
+class RefreshToken(Base):
+    __tablename__ = "refresh_tokens"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    token = Column(String, unique=True, nullable=False)
+    expires_at = Column(String, nullable=False)
+    is_revoked = Column(Boolean, default=False)
+
+class LoginHistory(Base):
+    __tablename__ = "login_history"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    ip_address = Column(String)
+    user_agent = Column(String)
+    login_at = Column(String, default=lambda: datetime.utcnow().isoformat())
+    success = Column(Boolean, default=True)
+
+
+# Redemption History tracking
+class RedemptionHistory(Base):
+    __tablename__ = "redemption_history"
+    id = Column(Integer, primary_key=True, index=True)
+    employee_name = Column(String, nullable=False)
+    reward_id = Column(Integer, ForeignKey("rewards.id"))
+    reward_name = Column(String, nullable=False)
+    points_spent = Column(Integer, nullable=False)
+    redeemed_at = Column(String, default=lambda: datetime.utcnow().isoformat())

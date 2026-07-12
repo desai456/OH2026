@@ -1,14 +1,44 @@
-const API_BASE_URL = "http://localhost:8000/api";
+﻿const API_BASE_URL = "http://localhost:8000/api";
 
 export async function fetchAPI(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
-  const response = await fetch(url, {
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers || {}),
-    },
-    ...options,
-  });
+  const token = localStorage.getItem("access_token");
+  const headers = {
+    "Content-Type": "application/json",
+    ...(options.headers || {}),
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  let response = await fetch(url, { ...options, headers });
+
+  // On 401, try refreshing the token once
+  if (response.status === 401 && token) {
+    const refreshToken = localStorage.getItem("refresh_token");
+    if (refreshToken) {
+      const refreshRes = await fetch(`${API_BASE_URL}/auth/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      });
+      if (refreshRes.ok) {
+        const data = await refreshRes.json();
+        localStorage.setItem("access_token", data.access_token);
+        localStorage.setItem("refresh_token", data.refresh_token);
+        localStorage.setItem("user_data", JSON.stringify(data.user));
+        headers["Authorization"] = `Bearer ${data.access_token}`;
+        response = await fetch(url, { ...options, headers });
+      } else {
+        // Refresh failed - clear auth and redirect to login
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        localStorage.removeItem("user_data");
+        window.location.reload();
+        throw new Error("Session expired. Please login again.");
+      }
+    }
+  }
+
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.detail || `Failed to fetch: ${response.statusText}`);
@@ -93,3 +123,27 @@ export const trainAdvancedModels = () => fetchAPI("/reports/ml-insights/train", 
 
 
 
+
+
+
+// Auth & Profile APIs
+export const getProfile = () => fetchAPI("/auth/me");
+export const updateProfile = (data) => fetchAPI("/auth/me", { method: "PUT", body: JSON.stringify(data) });
+export const changePassword = (data) => fetchAPI("/auth/change-password", { method: "PUT", body: JSON.stringify(data) });
+
+// Admin APIs (Super Admin only)
+export const getUsers = () => fetchAPI("/admin/users");
+export const createUser = (data) => fetchAPI("/admin/users", { method: "POST", body: JSON.stringify(data) });
+export const updateUser = (id, data) => fetchAPI(`/admin/users/${id}`, { method: "PUT", body: JSON.stringify(data) });
+export const deleteUser = (id) => fetchAPI(`/admin/users/${id}`, { method: "DELETE" });
+export const getRoles = () => fetchAPI("/admin/roles");
+export const getPermissions = () => fetchAPI("/admin/permissions");
+export const updateRolePermissions = (roleId, permissionIds) => fetchAPI(`/admin/roles/${roleId}/permissions`, { method: "PUT", body: JSON.stringify({ permission_ids: permissionIds }) });
+export const getLoginHistory = () => fetchAPI("/admin/login-history");
+
+
+// Enhanced Rewards APIs
+export const getEmployeeBalance = (name) => fetchAPI(`/gamification/employee-balance?employee_name=${encodeURIComponent(name)}`);
+export const getRedemptionHistory = (name) => fetchAPI(`/gamification/redemption-history?employee_name=${encodeURIComponent(name)}`);
+export const redeemRewardV2 = (rewardId, employeeName) => fetchAPI(`/gamification/redeem-v2?reward_id=${rewardId}&employee_name=${encodeURIComponent(employeeName)}`, { method: "POST" });
+export const getRewardsEnhanced = (name) => fetchAPI(`/gamification/rewards-enhanced?employee_name=${encodeURIComponent(name)}`);
