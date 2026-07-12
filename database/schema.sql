@@ -1,6 +1,4 @@
--- PostgreSQL DDL Schema for EcoSphere ESG Management Platform
 
--- Departments table
 CREATE TABLE IF NOT EXISTS departments (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -10,7 +8,7 @@ CREATE TABLE IF NOT EXISTS departments (
     status VARCHAR(50) DEFAULT 'Active'
 );
 
--- Categories table
+
 CREATE TABLE IF NOT EXISTS categories (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -18,7 +16,7 @@ CREATE TABLE IF NOT EXISTS categories (
     status VARCHAR(50) DEFAULT 'Active'
 );
 
--- Emission Factors table
+
 CREATE TABLE IF NOT EXISTS emission_factors (
     id SERIAL PRIMARY KEY,
     category VARCHAR(255) NOT NULL,
@@ -28,7 +26,7 @@ CREATE TABLE IF NOT EXISTS emission_factors (
     status VARCHAR(50) DEFAULT 'Active'
 );
 
--- Product ESG Profiles table
+
 CREATE TABLE IF NOT EXISTS product_profiles (
     id SERIAL PRIMARY KEY,
     product VARCHAR(255) NOT NULL,
@@ -37,7 +35,7 @@ CREATE TABLE IF NOT EXISTS product_profiles (
     cert VARCHAR(255)
 );
 
--- Environmental Goals table
+
 CREATE TABLE IF NOT EXISTS environmental_goals (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
