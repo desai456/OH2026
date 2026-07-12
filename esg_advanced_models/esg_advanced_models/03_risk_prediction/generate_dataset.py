@@ -14,7 +14,7 @@ OUTPUT_PATH = os.path.join(os.path.dirname(__file__), "risk_data.csv")
 
 
 def compute_risk_score(carbon, csr, compliance, audits, training, participation):
-    # Higher carbon = worse. Higher csr/compliance/audits/training/participation = better.
+    
     return (
         carbon * 0.35
         - csr * 0.20
@@ -52,8 +52,7 @@ def generate():
 
     df = pd.DataFrame(rows)
 
-    # Convert to balanced Low/Medium/High buckets via tertile thresholds
-    # so the demo classifier has meaningful classes to learn from.
+   
     low_cut, high_cut = df["risk_score"].quantile([0.33, 0.66])
 
     def bucket(score):
