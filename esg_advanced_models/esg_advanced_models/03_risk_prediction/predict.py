@@ -48,11 +48,11 @@ def predict_risk(department, carbon, csr_activities, compliance, audits,
                   training, employee_participation):
     model, label_encoder, dept_encoder = _load()
 
-    # Handle unseen department names gracefully
+    
     if department in dept_encoder.classes_:
         dept_enc = dept_encoder.transform([department])[0]
     else:
-        dept_enc = 0  # fallback bucket
+        dept_enc = 0  
 
     row = pd.DataFrame([{
         "department_enc": dept_enc,
