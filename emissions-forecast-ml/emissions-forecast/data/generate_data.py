@@ -30,9 +30,9 @@ rows = []
 for dept in departments:
     base = base_level[dept]
     for i, m in enumerate(months):
-        # gentle downward trend = sustainability initiatives slowly working
+        
         trend = -0.35 * i
-        # yearly seasonality: emissions a bit higher in winter months (heating, logistics)
+        
         seasonal = 12 * np.sin((m.month / 12) * 2 * np.pi + 1)
         noise = np.random.normal(0, 6)
         value = max(5, base + trend + seasonal + noise)
