@@ -14,7 +14,7 @@ import { getDashboardSummary, getNotifications, getSearchResults } from "./const
 
 import "./styles/App.css";
 
-// Modules
+
 import DashboardModule from "./components/modules/DashboardModule";
 import EnvironmentalModule from "./components/modules/EnvironmentalModule";
 import SocialModule from "./components/modules/SocialModule";
@@ -68,7 +68,7 @@ export default function EcoSphereApp() {
     return () => clearTimeout(delayDebounceFn);
   }, [searchQuery]);
 
-  // Global key listener for Ctrl+K
+  
   useEffect(() => {
     const handleKeyDown = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
@@ -80,7 +80,7 @@ export default function EcoSphereApp() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Keyboard navigation within search modal
+
   const handleSearchKeyDown = (e) => {
     if (e.key === "ArrowDown") {
       e.preventDefault();
@@ -114,7 +114,7 @@ export default function EcoSphereApp() {
     setSearchResults([]);
   };
 
-  // Focus input when search modal opens
+  
   useEffect(() => {
     if (showSearch && searchInputRef.current) {
       searchInputRef.current.focus();
