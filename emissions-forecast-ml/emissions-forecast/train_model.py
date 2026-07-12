@@ -1,10 +1,4 @@
-"""
-train_model.py
-================
-The full ML pipeline: load data -> build features -> train -> evaluate -> save.
 
-Run it with:  python3 train_model.py
-"""
 
 import numpy as np
 import pandas as pd
