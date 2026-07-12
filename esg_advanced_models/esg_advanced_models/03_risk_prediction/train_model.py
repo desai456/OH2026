@@ -24,7 +24,7 @@ DEPT_ENCODER_PATH = os.path.join(BASE_DIR, "dept_encoder.pkl")
 FEATURE_COLUMNS = ["department_enc", "carbon", "csr_activities",
                     "compliance", "audits", "training", "employee_participation"]
 
-
+# data
 def train():
     df = pd.read_csv(DATA_PATH)
 
