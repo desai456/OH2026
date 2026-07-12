@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 from .database import get_db
 from . import models
 
-# --------------- Configuration ---------------
+
 try:
     from dotenv import load_dotenv
     load_dotenv()
@@ -28,7 +28,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "
 REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("JWT_REFRESH_TOKEN_EXPIRE_DAYS", "7"))
 ALGORITHM = "HS256"
 
-# --------------- Password Hashing (bcrypt directly) ---------------
+
 def hash_password(password: str) -> str:
     pwd_bytes = password.encode("utf-8")
     salt = bcrypt.gensalt()
@@ -37,7 +37,6 @@ def hash_password(password: str) -> str:
 def verify_password(plain: str, hashed: str) -> bool:
     return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
 
-# --------------- JWT Token Utilities ---------------
 def create_access_token(user_id: int, role_name: str, expires_delta: Optional[timedelta] = None) -> str:
     expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     payload = {"sub": str(user_id), "role": role_name, "exp": expire, "type": "access"}
@@ -56,7 +55,7 @@ def decode_token(token: str) -> dict:
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
-# --------------- FastAPI Security Dependencies ---------------
+
 security = HTTPBearer(auto_error=False)
 
 def get_current_user(
