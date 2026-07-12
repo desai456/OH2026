@@ -84,9 +84,7 @@ best_model = forest_model if mae_forest < mae_linear else linear_model
 best_name = "random_forest" if best_model is forest_model else "linear_regression"
 print(f"\nBest model: {best_name}")
 
-# ---------------------------------------------------------------------------
-# 6. SAVE
-# ---------------------------------------------------------------------------
+
 joblib.dump(
     {"model": best_model, "feature_columns": list(features.columns), "departments": sorted(df["department"].unique())},
     "model/emissions_forecast_model.pkl",
