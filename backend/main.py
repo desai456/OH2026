@@ -966,3 +966,155 @@ def generate_custom_report(
         },
         "records": report_data
     }
+
+
+# Global Search Endpoint
+@app.get("/api/search")
+def global_search(q: str = Query(...), db: Session = Depends(get_db)):
+    query = f"%{q}%"
+    results = []
+
+    # 1. Departments
+    depts = db.query(models.Department).filter(
+        models.Department.name.ilike(query) | 
+        models.Department.code.ilike(query) | 
+        models.Department.head.ilike(query)
+    ).limit(8).all()
+    for d in depts:
+        results.append({
+            "id": d.id,
+            "title": d.name,
+            "subtitle": f"Code: {d.code} | Head: {d.head}",
+            "type": "department",
+            "link": {"module": "settings", "tab": "Departments"}
+        })
+
+    # 2. Employees
+    emps = db.query(models.Employee).filter(
+        models.Employee.name.ilike(query) | 
+        models.Employee.email.ilike(query)
+    ).limit(8).all()
+    for e in emps:
+        results.append({
+            "id": e.id,
+            "title": e.name,
+            "subtitle": e.email,
+            "type": "employee",
+            "link": {"module": "gamification", "tab": "Leaderboard"}
+        })
+
+    # 3. Environmental Goals
+    goals = db.query(models.EnvironmentalGoal).filter(
+        models.EnvironmentalGoal.name.ilike(query) | 
+        models.EnvironmentalGoal.dept.ilike(query)
+    ).limit(8).all()
+    for g in goals:
+        results.append({
+            "id": g.id,
+            "title": g.name,
+            "subtitle": f"Dept: {g.dept} | Target: {g.target} {g.unit}",
+            "type": "goal",
+            "link": {"module": "environmental", "tab": "Environmental goals"}
+        })
+
+    # 4. Emission Factors
+    factors = db.query(models.EmissionFactor).filter(
+        models.EmissionFactor.category.ilike(query) | 
+        models.EmissionFactor.source.ilike(query)
+    ).limit(8).all()
+    for f in factors:
+        results.append({
+            "id": f.id,
+            "title": f.category,
+            "subtitle": f"Factor: {f.factor} / {f.unit} ({f.source})",
+            "type": "emission_factor",
+            "link": {"module": "environmental", "tab": "Emission factors"}
+        })
+
+    # 5. Product Profiles
+    products = db.query(models.ProductProfile).filter(
+        models.ProductProfile.product.ilike(query) | 
+        models.ProductProfile.cert.ilike(query)
+    ).limit(8).all()
+    for p in products:
+        results.append({
+            "id": p.id,
+            "title": p.product,
+            "subtitle": f"Footprint: {p.footprint} | Recyclable: {p.recyclable} ({p.cert or 'No Cert'})",
+            "type": "product",
+            "link": {"module": "environmental", "tab": "Product ESG profiles"}
+        })
+
+    # 6. CSR Activities
+    csrs = db.query(models.CSRActivity).filter(
+        models.CSRActivity.name.ilike(query)
+    ).limit(8).all()
+    for c in csrs:
+        results.append({
+            "id": c.id,
+            "title": c.name,
+            "subtitle": f"Joined: {c.joined} | Tone: {c.tone}",
+            "type": "csr_activity",
+            "link": {"module": "social", "tab": "CSR activities"}
+        })
+
+    # 7. Policies
+    policies = db.query(models.Policy).filter(
+        models.Policy.name.ilike(query) | 
+        models.Policy.owner.ilike(query)
+    ).limit(8).all()
+    for po in policies:
+        results.append({
+            "id": po.id,
+            "title": po.name,
+            "subtitle": f"Owner: {po.owner} | {po.version} (Updated: {po.updated})",
+            "type": "policy",
+            "link": {"module": "governance", "tab": "Policies"}
+        })
+
+    # 8. Audits
+    audits = db.query(models.Audit).filter(
+        models.Audit.title.ilike(query) | 
+        models.Audit.dept.ilike(query) | 
+        models.Audit.auditor.ilike(query)
+    ).limit(8).all()
+    for a in audits:
+        results.append({
+            "id": a.id,
+            "title": a.title,
+            "subtitle": f"Dept: {a.dept} | Auditor: {a.auditor} ({a.status})",
+            "type": "audit",
+            "link": {"module": "governance", "tab": "Audits"}
+        })
+
+    # 9. Compliance Issues
+    issues = db.query(models.ComplianceIssue).filter(
+        models.ComplianceIssue.issue.ilike(query) | 
+        models.ComplianceIssue.dept.ilike(query) | 
+        models.ComplianceIssue.owner.ilike(query)
+    ).limit(8).all()
+    for i in issues:
+        results.append({
+            "id": i.id,
+            "title": i.issue,
+            "subtitle": f"Severity: {i.severity} | Owner: {i.owner} ({i.status})",
+            "type": "compliance_issue",
+            "link": {"module": "governance", "tab": "Compliance issues"}
+        })
+
+    # 10. Challenges
+    challenges = db.query(models.Challenge).filter(
+        models.Challenge.name.ilike(query) | 
+        models.Challenge.category.ilike(query)
+    ).limit(8).all()
+    for ch in challenges:
+        results.append({
+            "id": ch.id,
+            "title": ch.name,
+            "subtitle": f"Category: {ch.category} | XP: {ch.xp} ({ch.difficulty})",
+            "type": "challenge",
+            "link": {"module": "gamification", "tab": "Challenges"}
+        })
+
+    return results
+

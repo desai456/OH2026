@@ -69,6 +69,42 @@ export default function EnvironmentalModule({ tab, onRefresh }) {
     }
   };
 
+  const handleExportCSV = () => {
+    if (!goals || goals.length === 0) return;
+    const headers = ["Goal", "Department", "Target", "Current Progress", "Unit", "Deadline", "Status"];
+    const rows = goals.map(g => [
+      g.name,
+      g.dept,
+      g.target,
+      g.current,
+      g.unit,
+      g.deadline,
+      g.status
+    ]);
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => 
+        row.map(val => {
+          let cleanVal = val === null || val === undefined ? '' : String(val);
+          cleanVal = cleanVal.replace(/"/g, '""');
+          if (cleanVal.includes(",") || cleanVal.includes('"') || cleanVal.includes("\n")) {
+            cleanVal = `"${cleanVal}"`;
+          }
+          return cleanVal;
+        }).join(",")
+      )
+    ].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "environmental_goals.csv");
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="stack-lg">
       <SectionTitle eyebrow="Environmental" title={tab} />
@@ -78,7 +114,7 @@ export default function EnvironmentalModule({ tab, onRefresh }) {
           <div className="panel-toolbar">
             <button className="btn-primary" style={{ background: COLORS.env }} onClick={() => setShowGoalModal(true)}><Plus size={14} /> New goal</button>
             <div className="spacer" />
-            <button className="btn-ghost"><Download size={14} /> Export</button>
+            <button className="btn-ghost" onClick={handleExportCSV}><Download size={14} /> Export</button>
           </div>
           <DataTable
             columns={["Goal", "Department", "Target", "Progress", "Deadline", "Status"]}

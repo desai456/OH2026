@@ -74,3 +74,7 @@ export const generateCustomReport = (params) => {
   const query = new URLSearchParams(params).toString();
   return fetchAPI(`/reports/custom?${query}`);
 };
+
+// Global Search
+export const getSearchResults = (q) => fetchAPI(`/search?q=${encodeURIComponent(q)}`);
+

@@ -1,11 +1,15 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { Leaf, Search, Bell, ChevronDown } from "lucide-react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
+import { 
+  Leaf, Search, Bell, ChevronDown, Trophy, ShieldCheck, Users, 
+  FileText, ClipboardCheck, AlertTriangle, Package, Heart, 
+  Building2, User, Zap, Target, X 
+} from "lucide-react";
 
 // Config and constants
 import { COLORS, NAV_TREE, DEFAULT_TABS } from "./constants/config";
 
 // API
-import { getDashboardSummary, getNotifications } from "./constants/api";
+import { getDashboardSummary, getNotifications, getSearchResults } from "./constants/api";
 
 // Styles
 import "./styles/App.css";
@@ -19,12 +23,104 @@ import GamificationModule from "./components/modules/GamificationModule";
 import ReportsModule from "./components/modules/ReportsModule";
 import SettingsModule from "./components/modules/SettingsModule";
 
+const typeIcons = {
+  department: <Building2 size={14} />,
+  employee: <User size={14} />,
+  goal: <Target size={14} />,
+  emission_factor: <Zap size={14} />,
+  product: <Package size={14} />,
+  csr_activity: <Heart size={14} />,
+  policy: <FileText size={14} />,
+  audit: <ClipboardCheck size={14} />,
+  compliance_issue: <AlertTriangle size={14} />,
+  challenge: <Trophy size={14} />,
+};
+
 export default function EcoSphereApp() {
   const [active, setActive] = useState("dashboard");
   const [tabs, setTabs] = useState(DEFAULT_TABS);
   const [overallScore, setOverallScore] = useState(81);
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
+
+  // Search Engine states
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const searchInputRef = useRef(null);
+
+  // Trigger search when query changes
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    const delayDebounceFn = setTimeout(async () => {
+      try {
+        const data = await getSearchResults(searchQuery);
+        setSearchResults(data);
+        setSelectedIndex(0);
+      } catch (err) {
+        console.error("Search error:", err);
+      }
+    }, 200); // 200ms debounce
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery]);
+
+  // Global key listener for Ctrl+K
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setShowSearch((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Keyboard navigation within search modal
+  const handleSearchKeyDown = (e) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setSelectedIndex((prevIndex) => 
+        searchResults.length > 0 ? (prevIndex + 1) % searchResults.length : 0
+      );
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSelectedIndex((prevIndex) => 
+        searchResults.length > 0 ? (prevIndex - 1 + searchResults.length) % searchResults.length : 0
+      );
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (searchResults[selectedIndex]) {
+        handleSelectResult(searchResults[selectedIndex]);
+      }
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      closeSearch();
+    }
+  };
+
+  const handleSelectResult = (result) => {
+    goTo(result.link.module, result.link.tab);
+    closeSearch();
+  };
+
+  const closeSearch = () => {
+    setShowSearch(false);
+    setSearchQuery("");
+    setSearchResults([]);
+  };
+
+  // Focus input when search modal opens
+  useEffect(() => {
+    if (showSearch && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [showSearch]);
+
 
   const loadGlobalMetrics = async () => {
     try {
@@ -114,7 +210,15 @@ export default function EcoSphereApp() {
       <div className="main-col">
         <header className="topbar">
           <div className="topbar-title">{NAV_TREE.find((n) => n.id === active)?.label}</div>
-          <div className="search-box"><Search size={13} /> Search departments, employees, reports…</div>
+          <button 
+            className="search-box" 
+            style={{ cursor: "pointer", textAlign: "left", width: "260px", background: "none", border: `1px solid ${COLORS.line}` }} 
+            onClick={() => setShowSearch(true)}
+          >
+            <Search size={13} />
+            <span style={{ flex: 1, color: COLORS.inkSoft }}>Search platform...</span>
+            <span style={{ fontSize: "10px", opacity: 0.6, background: COLORS.bg, padding: "2px 4px", borderRadius: "4px" }} className="mono">Ctrl+K</span>
+          </button>
           <div className="topbar-right" style={{ position: "relative" }}>
             <button className="icon-btn" onClick={() => setShowNotifications(!showNotifications)}>
               <Bell size={16} />
@@ -160,6 +264,78 @@ export default function EcoSphereApp() {
         </header>
         <main className="content-area">{content}</main>
       </div>
+
+      {showSearch && (
+        <div className="search-overlay" onClick={closeSearch}>
+          <div className="search-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="search-input-container">
+              <Search size={16} color={COLORS.inkSoft} />
+              <input
+                ref={searchInputRef}
+                type="text"
+                className="search-input-field"
+                placeholder="Search departments, employees, goals, policies, audits, challenges..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleSearchKeyDown}
+              />
+              <button onClick={closeSearch} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, display: "flex", alignItems: "center" }}>
+                <X size={16} />
+              </button>
+            </div>
+            
+            <div className="search-results-list">
+              {searchQuery.trim() === "" ? (
+                <div className="search-results-empty">
+                  Type something to search across the ESG platform...
+                </div>
+              ) : searchResults.length === 0 ? (
+                <div className="search-results-empty">
+                  No results found for "{searchQuery}"
+                </div>
+              ) : (
+                searchResults.map((result, idx) => {
+                  const isSelected = idx === selectedIndex;
+                  return (
+                    <div
+                      key={`${result.type}-${result.id}`}
+                      className={`search-result-item ${isSelected ? "selected" : ""}`}
+                      onClick={() => handleSelectResult(result)}
+                    >
+                      <div className="search-result-icon-wrap" style={{ 
+                        background: result.type === "compliance_issue" ? "#FDF2F2" : `${COLORS.env}14`,
+                        color: result.type === "compliance_issue" ? COLORS.bad : COLORS.env
+                      }}>
+                        {typeIcons[result.type] || <FileText size={14} />}
+                      </div>
+                      <div className="search-result-details">
+                        <div className="search-result-title">{result.title}</div>
+                        <div className="search-result-subtitle">{result.subtitle}</div>
+                      </div>
+                      <span className="search-result-type-tag" style={{
+                        background: result.type === "compliance_issue" ? "#FDF2F2" : `${COLORS.env}14`,
+                        color: result.type === "compliance_issue" ? COLORS.bad : COLORS.env
+                      }}>
+                        {result.type.replace("_", " ")}
+                      </span>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            <div className="search-modal-footer">
+              <div className="search-modal-shortcuts">
+                <span><span className="search-shortcut-key">↑↓</span> Navigate</span>
+                <span><span className="search-shortcut-key">Enter</span> Select</span>
+                <span><span className="search-shortcut-key">Esc</span> Close</span>
+              </div>
+              <div style={{ opacity: 0.8 }}>EcoSphere ESG Search</div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
