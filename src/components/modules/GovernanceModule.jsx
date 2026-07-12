@@ -17,7 +17,7 @@ export default function GovernanceModule({ tab, onRefresh }) {
   const [audits, setAudits] = useState([]);
   const [issues, setIssues] = useState([]);
 
-  // Modals state
+  // Modal state
   const [showAuditModal, setShowAuditModal] = useState(false);
   const [showIssueModal, setShowIssueModal] = useState(false);
 
