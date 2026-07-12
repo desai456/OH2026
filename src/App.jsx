@@ -4,7 +4,7 @@ import { Leaf, Search, Bell, ChevronDown } from "lucide-react";
 // Config and constants
 import { COLORS, NAV_TREE, DEFAULT_TABS } from "./constants/config";
 
-// API
+// Application Programming Interface
 import { getDashboardSummary, getNotifications } from "./constants/api";
 
 // Styles
