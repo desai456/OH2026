@@ -44,6 +44,7 @@ export default function DashboardModule({ onRefresh }) {
           <ScoreRing label="Social" value={Math.round(data.socialScore)} tone="social" />
           <ScoreRing label="Governance" value={Math.round(data.govScore)} tone="gov" />
           <ScoreRing label="Overall ESG" value={Math.round(data.overallScore)} tone="game" size={148} />
+          <ScoreRing label="Predicted Next Month (ML)" value={Math.round(data.predictedScore || 80)} tone="social" size={148} />
         </div>
       </section>
 

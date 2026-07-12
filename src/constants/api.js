@@ -82,4 +82,14 @@ export const getSearchResults = (q) => fetchAPI(`/search?q=${encodeURIComponent(
 export const getEmissionsForecast = () => fetchAPI("/environmental/forecast");
 export const trainEmissionsModel = () => fetchAPI("/environmental/forecast/train", { method: "POST" });
 
+// Advanced ML Models
+export const getMLInsights = () => fetchAPI("/reports/ml-insights");
+export const predictParticipation = (payload) => fetchAPI("/reports/ml-insights/predict-participation", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(payload)
+});
+export const trainAdvancedModels = () => fetchAPI("/reports/ml-insights/train", { method: "POST" });
+
+
 

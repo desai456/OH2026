@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Filter, Download } from "lucide-react";
+import { Filter, Download, BrainCircuit, ShieldAlert, Sparkles, RefreshCw, Activity, UserCheck, AlertTriangle, Lightbulb } from "lucide-react";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { COLORS, REPORT_TAB_KEY } from "../../constants/config";
 import { reportCards } from "../../constants/mockData";
 import { 
@@ -7,11 +8,15 @@ import {
   getDepartments, 
   getEmployees, 
   getChallengesList, 
-  getCategories 
+  getCategories,
+  getMLInsights,
+  predictParticipation,
+  trainAdvancedModels
 } from "../../constants/api";
 import SectionTitle from "../common/SectionTitle";
 import DataTable from "../common/DataTable";
 import StatusPill from "../common/StatusPill";
+import Pill from "../common/Pill";
 
 export default function ReportsModule({ tab, goTo }) {
   const selectedKey = REPORT_TAB_KEY[tab] || "custom";
@@ -32,6 +37,64 @@ export default function ReportsModule({ tab, goTo }) {
 
   const [reportResults, setReportResults] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // ML Insights states
+  const [mlInsights, setMlInsights] = useState(null);
+  const [loadingML, setLoadingML] = useState(false);
+  const [trainingML, setTrainingML] = useState(false);
+  const [participationForm, setParticipationForm] = useState({
+    department: "Corporate",
+    previous_csr: 5,
+    attendance_pct: 85,
+    experience_years: 3,
+    previous_challenges: 4
+  });
+  const [participationResult, setParticipationResult] = useState(null);
+  const [loadingParticipation, setLoadingParticipation] = useState(false);
+
+  const loadMLInsights = async () => {
+    setLoadingML(true);
+    try {
+      const res = await getMLInsights();
+      setMlInsights(res);
+    } catch (err) {
+      console.error("Error loading ML insights:", err);
+    } finally {
+      setLoadingML(false);
+    }
+  };
+
+  const handleTrainML = async () => {
+    setTrainingML(true);
+    try {
+      const res = await trainAdvancedModels();
+      alert("All advanced ML models and the ESG score prediction model trained successfully!");
+      loadMLInsights();
+    } catch (err) {
+      alert("Error training models: " + err.message);
+    } finally {
+      setTrainingML(false);
+    }
+  };
+
+  const handlePredictParticipation = async (e) => {
+    if (e) e.preventDefault();
+    setLoadingParticipation(true);
+    try {
+      const res = await predictParticipation(participationForm);
+      setParticipationResult(res);
+    } catch (err) {
+      alert("Error predicting participation: " + err.message);
+    } finally {
+      setLoadingParticipation(false);
+    }
+  };
+
+  useEffect(() => {
+    if (tab === "Predictive Analytics (ML)") {
+      loadMLInsights();
+    }
+  }, [tab]);
 
   // Load dropdown options dynamically from the DB
   useEffect(() => {
@@ -304,102 +367,281 @@ export default function ReportsModule({ tab, goTo }) {
       </div>
 
       {/* Filter and Report Builder Panel */}
-      <div className="panel">
-        <SectionTitle eyebrow="Report Filters" title="Customize parameters" />
-        
-        <div className="filter-grid">
-          <label className="filter-field">
-            <span>Department</span>
-            <select value={filters.department} onChange={(e) => setFilters({ ...filters, department: e.target.value })}>
-              {deptOpts.map((o) => <option key={o} value={o}>{o}</option>)}
-            </select>
-          </label>
-
-          <label className="filter-field">
-            <span>Date range</span>
-            <select value={filters.date_range} onChange={(e) => setFilters({ ...filters, date_range: e.target.value })}>
-              <option value="This quarter">This quarter</option>
-              <option value="This month">This month</option>
-              <option value="Last 12 months">Last 12 months</option>
-              <option value="All">All time</option>
-            </select>
-          </label>
-
-          <label className="filter-field">
-            <span>Module</span>
-            <select 
-              value={filters.module} 
-              onChange={(e) => setFilters({ ...filters, module: e.target.value })}
-              disabled={tab !== "Custom report builder" && tab !== "ESG summary"}
-            >
-              <option value="All modules">All modules</option>
-              <option value="Environmental">Environmental</option>
-              <option value="Social">Social</option>
-              <option value="Governance">Governance</option>
-              <option value="Gamification">Gamification</option>
-            </select>
-          </label>
-
-          <label className="filter-field">
-            <span>Employee</span>
-            <select value={filters.employee} onChange={(e) => setFilters({ ...filters, employee: e.target.value })}>
-              {empOpts.map((o) => <option key={o} value={o}>{o}</option>)}
-            </select>
-          </label>
-
-          <label className="filter-field">
-            <span>Challenge</span>
-            <select value={filters.challenge} onChange={(e) => setFilters({ ...filters, challenge: e.target.value })}>
-              {challengeOpts.map((o) => <option key={o} value={o}>{o}</option>)}
-            </select>
-          </label>
-
-          <label className="filter-field">
-            <span>ESG category</span>
-            <select value={filters.category} onChange={(e) => setFilters({ ...filters, category: e.target.value })}>
-              {categoryOpts.map((o) => <option key={o} value={o}>{o}</option>)}
-            </select>
-          </label>
-        </div>
-
-        <div className="panel-toolbar" style={{ marginTop: 18 }}>
-          <button className="btn-primary" style={{ background: COLORS.ink }} onClick={runReport} disabled={isLoading}>
-             {isLoading ? "Running..." : "Run report"}
-          </button>
+      {tab === "Predictive Analytics (ML)" ? (
+        <div className="stack-lg">
+          <style>{`
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+            .spin {
+              animation: spin 1.2s linear infinite;
+            }
+          `}</style>
           
-          <div className="spacer" />
-          
-          {reportResults && reportResults.length > 0 && (
+          {loadingML || !mlInsights ? (
+            <div className="empty-note">Running Advanced ML models and calculating insights...</div>
+          ) : (
             <>
-              <button className="btn-ghost" onClick={exportPDF}><Download size={14} /> PDF</button>
-              <button className="btn-ghost" onClick={exportExcel}><Download size={14} /> Excel</button>
-              <button className="btn-ghost" onClick={exportCSV}><Download size={14} /> CSV</button>
+              {/* Row 1: Risks and Anomalies */}
+              <div className="grid-2" style={{ gap: "20px" }}>
+                {/* Risk Classification Panel */}
+                <div className="panel" style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                  <div className="section-title-row">
+                    <div>
+                      <div className="eyebrow" style={{ display: "flex", alignItems: "center", gap: "6px" }}><ShieldAlert size={12} color={COLORS.game} /> ESG Risk Predictor</div>
+                      <div className="section-title" style={{ fontSize: "18px" }}>Departmental Risk Classifications</div>
+                    </div>
+                    <button 
+                      className="btn-ghost" 
+                      onClick={handleTrainML} 
+                      disabled={trainingML}
+                      style={{ opacity: trainingML ? 0.6 : 1, display: "flex", alignItems: "center", gap: "8px" }}
+                    >
+                      <RefreshCw size={13} className={trainingML ? "spin" : ""} /> {trainingML ? "Retraining..." : "Retrain AI Suite"}
+                    </button>
+                  </div>
+                  <div className="stack-sm">
+                    {mlInsights.risks.map((r, i) => (
+                      <div key={i} style={{ display: "flex", alignItems: "center", justifycontent: "space-between", padding: "10px 14px", border: `1px solid ${COLORS.line}`, borderRadius: "8px", background: COLORS.surface2 }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: "600", fontSize: "14px" }}>{r.department}</div>
+                          <div className="mini-note" style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "4px" }}>
+                            {r.reasons.map((reason, idx) => (
+                              <span key={idx} style={{ background: COLORS.line, padding: "2px 6px", borderRadius: "4px", fontSize: "10px" }}>{reason}</span>
+                            ))}
+                          </div>
+                        </div>
+                        <Pill tone={r.risk_level === "High Risk" ? "game" : r.risk_level === "Medium Risk" ? "social" : "env"}>
+                          {r.risk_level}
+                        </Pill>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Anomaly Detection Panel */}
+                <div className="panel" style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                  <div className="eyebrow" style={{ display: "flex", alignItems: "center", gap: "6px" }}><AlertTriangle size={12} color={COLORS.social} /> Anomaly Detector</div>
+                  <div className="section-title" style={{ fontSize: "18px" }}>Resource Usage Anomalies</div>
+                  <div className="stack-sm">
+                    {mlInsights.anomalies.map((a, i) => (
+                      <div key={i} style={{ display: "flex", alignItems: "center", justifycontent: "space-between", padding: "10px 14px", border: `1px solid ${COLORS.line}`, borderRadius: "8px", background: COLORS.surface2 }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: "600", fontSize: "14px" }}>{a.department}</div>
+                          <div className="mini-note" style={{ marginTop: "4px" }}>
+                            Fuel: {a.raw_input.fuel_usage}L | Elec: {a.raw_input.electricity_usage}kWh
+                          </div>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <span className="mono" style={{ fontSize: "12px", color: COLORS.inkSoft }}>{a.confidence_percent}% confidence</span>
+                          <Pill tone={a.abnormal_usage_detected ? "game" : "env"}>
+                            {a.abnormal_usage_detected ? "Abnormal" : "Normal"}
+                          </Pill>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Row 2: Employee Segmentation & Participation Predictor */}
+              <div className="grid-2" style={{ gap: "20px" }}>
+                {/* Employee Segmentation (KMeans) */}
+                <div className="panel" style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                  <div className="eyebrow" style={{ display: "flex", alignItems: "center", gap: "6px" }}><Activity size={12} color={COLORS.env} /> Employee Engagement Clustering</div>
+                  <div className="section-title" style={{ fontSize: "18px" }}>KMeans Engagement Segments</div>
+                  <div style={{ height: "160px", display: "flex", alignItems: "center", justifycontent: "center" }}>
+                    <div style={{ width: "160px", height: "160px" }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={mlInsights.segmentation}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={45}
+                            outerRadius={65}
+                            paddingAngle={3}
+                            dataKey="value"
+                          >
+                            <Cell fill={COLORS.env} />
+                            <Cell fill={COLORS.social} />
+                            <Cell fill={COLORS.inkSoft} />
+                          </Pie>
+                          <Tooltip />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginLeft: "14px", flex: 1 }}>
+                      {mlInsights.segmentation.map((entry, index) => {
+                        const color = [COLORS.env, COLORS.social, COLORS.inkSoft][index];
+                        return (
+                          <div key={index} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px" }}>
+                            <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: color }} />
+                            <span>{entry.name}: <strong>{entry.value}</strong></span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Logistic Regression Predictor */}
+                <div className="panel" style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                  <div className="eyebrow" style={{ display: "flex", alignItems: "center", gap: "6px" }}><UserCheck size={12} color={COLORS.social} /> Activity Participation Predictor</div>
+                  <div className="section-title" style={{ fontSize: "18px" }}>Predict Join Probability</div>
+                  <form onSubmit={handlePredictParticipation} className="filter-grid" style={{ gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                    <label className="filter-field">
+                      <span>Department</span>
+                      <select value={participationForm.department} onChange={(e) => setParticipationForm({ ...participationForm, department: e.target.value })}>
+                        <option value="Corporate">Corporate</option>
+                        <option value="Manufacturing">Manufacturing</option>
+                        <option value="Sales">Sales</option>
+                        <option value="IT">IT</option>
+                      </select>
+                    </label>
+                    <label className="filter-field">
+                      <span>Prev. CSR Joined</span>
+                      <input type="number" required value={participationForm.previous_csr} onChange={(e) => setParticipationForm({ ...participationForm, previous_csr: e.target.value })} />
+                    </label>
+                    <label className="filter-field">
+                      <span>Attendance %</span>
+                      <input type="number" required value={participationForm.attendance_pct} onChange={(e) => setParticipationForm({ ...participationForm, attendance_pct: e.target.value })} />
+                    </label>
+                    <label className="filter-field">
+                      <span>Years Exp.</span>
+                      <input type="number" required value={participationForm.experience_years} onChange={(e) => setParticipationForm({ ...participationForm, experience_years: e.target.value })} />
+                    </label>
+                    <div style={{ gridColumn: "span 2", display: "flex", alignItems: "center", gap: "14px", marginTop: "4px" }}>
+                      <button type="submit" className="btn-primary" style={{ background: COLORS.social, margin: 0 }} disabled={loadingParticipation}>
+                        {loadingParticipation ? "Calculating..." : "Predict Join"}
+                      </button>
+                      {participationResult && (
+                        <div style={{ fontSize: "13px" }}>
+                          Probability: <strong style={{ color: COLORS.social }}>{participationResult.probability_percent}%</strong> (To Join: <strong>{participationResult.predicted_to_join ? "Yes" : "No"}</strong>)
+                        </div>
+                      )}
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              {/* Row 3: Actionable AI Recommendations */}
+              <div className="panel" style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                <div className="eyebrow" style={{ display: "flex", alignItems: "center", gap: "6px" }}><Lightbulb size={12} color={COLORS.env} /> Actionable AI Recommendations</div>
+                <div className="section-title" style={{ fontSize: "18px" }}>AI Generated Sustainability Plan</div>
+                <div className="stack-sm">
+                  {mlInsights.recommendations.map((rec, i) => (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: "14px", padding: "12px 16px", border: `1px solid ${COLORS.line}`, borderRadius: "8px", background: COLORS.surface2 }}>
+                      <Pill tone={rec.priority === "High" ? "game" : rec.priority === "Medium" ? "social" : "env"}>
+                        {rec.priority} Priority
+                      </Pill>
+                      <div style={{ fontSize: "13.5px", color: COLORS.ink, fontWeight: "500" }}>{rec.recommendation}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </>
           )}
         </div>
+      ) : (
+        <div className="panel">
+          <SectionTitle eyebrow="Report Filters" title="Customize parameters" />
+          
+          <div className="filter-grid">
+            <label className="filter-field">
+              <span>Department</span>
+              <select value={filters.department} onChange={(e) => setFilters({ ...filters, department: e.target.value })}>
+                {deptOpts.map((o) => <option key={o} value={o}>{o}</option>)}
+              </select>
+            </label>
 
-        {reportResults && (
-          <div style={{ marginTop: "24px" }}>
-            <SectionTitle title={`${tab} Results`} />
-            {reportResults.length === 0 ? (
-              <div className="empty-note">No matching records found for these filters.</div>
-            ) : (
-              <DataTable
-                columns={["Module", "Metric", "Department / Employee", "Value", "Status"]}
-                rows={reportResults}
-                renderCell={(r, c) => {
-                  if (c === "Module") return r.module;
-                  if (c === "Metric") return <span className="cell-strong">{r.metric}</span>;
-                  if (c === "Department / Employee") return r.department || r.employee || "—";
-                  if (c === "Value") return <span className="mono">{r.value}</span>;
-                  if (c === "Status") return <StatusPill status={r.status} />;
-                  return null;
-                }}
-              />
+            <label className="filter-field">
+              <span>Date range</span>
+              <select value={filters.date_range} onChange={(e) => setFilters({ ...filters, date_range: e.target.value })}>
+                <option value="This quarter">This quarter</option>
+                <option value="This month">This month</option>
+                <option value="Last 12 months">Last 12 months</option>
+                <option value="All">All time</option>
+              </select>
+            </label>
+
+            <label className="filter-field">
+              <span>Module</span>
+              <select 
+                value={filters.module} 
+                onChange={(e) => setFilters({ ...filters, module: e.target.value })}
+                disabled={tab !== "Custom report builder" && tab !== "ESG summary"}
+              >
+                <option value="All modules">All modules</option>
+                <option value="Environmental">Environmental</option>
+                <option value="Social">Social</option>
+                <option value="Governance">Governance</option>
+                <option value="Gamification">Gamification</option>
+              </select>
+            </label>
+
+            <label className="filter-field">
+              <span>Employee</span>
+              <select value={filters.employee} onChange={(e) => setFilters({ ...filters, employee: e.target.value })}>
+                {empOpts.map((o) => <option key={o} value={o}>{o}</option>)}
+              </select>
+            </label>
+
+            <label className="filter-field">
+              <span>Challenge</span>
+              <select value={filters.challenge} onChange={(e) => setFilters({ ...filters, challenge: e.target.value })}>
+                {challengeOpts.map((o) => <option key={o} value={o}>{o}</option>)}
+              </select>
+            </label>
+
+            <label className="filter-field">
+              <span>ESG category</span>
+              <select value={filters.category} onChange={(e) => setFilters({ ...filters, category: e.target.value })}>
+                {categoryOpts.map((o) => <option key={o} value={o}>{o}</option>)}
+              </select>
+            </label>
+          </div>
+
+          <div className="panel-toolbar" style={{ marginTop: 18 }}>
+            <button className="btn-primary" style={{ background: COLORS.ink }} onClick={runReport} disabled={isLoading}>
+               {isLoading ? "Running..." : "Run report"}
+            </button>
+            
+            <div className="spacer" />
+            
+            {reportResults && reportResults.length > 0 && (
+              <>
+                <button className="btn-ghost" onClick={exportPDF}><Download size={14} /> PDF</button>
+                <button className="btn-ghost" onClick={exportExcel}><Download size={14} /> Excel</button>
+                <button className="btn-ghost" onClick={exportCSV}><Download size={14} /> CSV</button>
+              </>
             )}
           </div>
-        )}
-      </div>
+
+          {reportResults && (
+            <div style={{ marginTop: "24px" }}>
+              <SectionTitle title={`${tab} Results`} />
+              {reportResults.length === 0 ? (
+                <div className="empty-note">No matching records found for these filters.</div>
+              ) : (
+                <DataTable
+                  columns={["Module", "Metric", "Department / Employee", "Value", "Status"]}
+                  rows={reportResults}
+                  renderCell={(r, c) => {
+                    if (c === "Module") return r.module;
+                    if (c === "Metric") return <span className="cell-strong">{r.metric}</span>;
+                    if (c === "Department / Employee") return r.department || r.employee || "—";
+                    if (c === "Value") return <span className="mono">{r.value}</span>;
+                    if (c === "Status") return <StatusPill status={r.status} />;
+                    return null;
+                  }}
+                />
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

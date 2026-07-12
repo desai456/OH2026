@@ -45,6 +45,9 @@
   padding: 20px 14px;
   display: flex; flex-direction: column; gap: 18px;
   max-height: 100vh; overflow-y: auto;
+  position: sticky;
+  top: 0;
+  height: 100vh;
 }
 .brand { display: flex; align-items: center; gap: 9px; padding: 0 8px; }
 .brand-mark { width: 28px; height: 28px; border-radius: 7px; background: var(--color-ink); display:flex; align-items:center; justify-content:center; color: #fff; flex-shrink: 0; }

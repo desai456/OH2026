@@ -18,7 +18,7 @@ export const NAV_TREE = [
   { id: "social", label: "Social", icon: Users, tone: "social", tabs: ["CSR activities", "Employee participation", "Diversity dashboard"] },
   { id: "governance", label: "Governance", icon: ShieldCheck, tone: "gov", tabs: ["Policies", "Policy acknowledgements", "Audits", "Compliance issues"] },
   { id: "gamification", label: "Gamification", icon: Trophy, tone: "game", tabs: ["Challenges", "Challenge participation", "Badges", "Rewards", "Leaderboard"] },
-  { id: "reports", label: "Reports", icon: FileBarChart2, tone: "gov", tabs: ["Environmental report", "Social report", "Governance report", "ESG summary", "Custom report builder"] },
+  { id: "reports", label: "Reports", icon: FileBarChart2, tone: "gov", tabs: ["Environmental report", "Social report", "Governance report", "ESG summary", "Custom report builder", "Predictive Analytics (ML)"] },
   { id: "settings", label: "Settings", icon: SettingsIcon, tone: "env", tabs: ["Departments", "Categories", "ESG configuration", "Notification settings"] },
 ];
 
